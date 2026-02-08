@@ -5,7 +5,7 @@ TypeScript SDK for building mods and extensions for [Desktop Homunculus](https:/
 ## Install
 
 ```bash
-pnpm add @homunculus/api@https://github.com/not-elm/homunculus-typescript-sdk
+pnpm add @homunculus/api@https://github.com/desktop-homunculus/typescript-sdk
 ```
 
 ## Quick Start
@@ -30,7 +30,7 @@ await effects.sound("my-mod::notification.wav");
 ## API Overview
 
 | Namespace     | Description                                                               |
-|---------------|---------------------------------------------------------------------------|
+| ------------- | ------------------------------------------------------------------------- |
 | `Vrm`         | VRM 3D character lifecycle — spawn, find, pointer events, voice synthesis |
 | `Vrma`        | VRMA animation management for VRM characters                              |
 | `gpt`         | AI chat, model selection, system prompts, web search                      |
