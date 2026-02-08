@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/not-elm/desktop_homunculus.git"
+    "url": "git+https://github.com/desktop-homunculus/typescript-sdk.git"
   },
   "files": [
     "dist"
