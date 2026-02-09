@@ -168,7 +168,7 @@ export namespace entities {
     ): Promise<number> => {
         const response = await host.get(host.createUrl("entities", {
             name,
-            root: options?.root
+            ...options,
         }));
         return await response.json();
     }
