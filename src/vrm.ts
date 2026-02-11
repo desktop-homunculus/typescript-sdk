@@ -11,6 +11,7 @@ import {
     VrmaPlayRequest,
     VrmaState,
     VrmaInfo,
+    VrmSnapshot,
 } from "./math";
 import {host} from "./host";
 import {EventSource} from "eventSource";
@@ -380,11 +381,11 @@ export class Vrm {
      */
     static async findByName(vrmName: string): Promise<Vrm> {
         const response = await host.get(host.createUrl("vrm", {name: vrmName}));
-        const vrms = await response.json() as VrmMetadata[];
-        if (vrms.length === 0) {
+        const entities = await response.json() as number[];
+        if (entities.length === 0) {
             throw new Error(`VRM not found: ${vrmName}`);
         }
-        return new Vrm(vrms[0].entity);
+        return new Vrm(entities[0]);
     }
 
     /**
@@ -399,9 +400,34 @@ export class Vrm {
         return new Vrm(Number(await response.json()));
     }
 
-    static async findAllMetadata(): Promise<VrmMetadata[]> {
+    /**
+     * Returns entity IDs of all currently loaded VRM instances.
+     *
+     * @example
+     * ```typescript
+     * const entities = await Vrm.findAllEntities();
+     * console.log(`Found ${entities.length} VRM entities`);
+     * ```
+     */
+    static async findAllEntities(): Promise<number[]> {
         const response = await host.get(host.createUrl("vrm"));
-        return await response.json();
+        return await response.json() as number[];
+    }
+
+    /**
+     * Returns detailed snapshot of all VRM instances.
+     *
+     * @example
+     * ```typescript
+     * const snapshots = await Vrm.findAllDetailed();
+     * for (const s of snapshots) {
+     *   console.log(`${s.name}: ${s.state} at (${s.globalViewport?.x}, ${s.globalViewport?.y})`);
+     * }
+     * ```
+     */
+    static async findAllDetailed(): Promise<VrmSnapshot[]> {
+        const response = await host.get(host.createUrl("vrm/snapshot"));
+        return await response.json() as VrmSnapshot[];
     }
 
     static streamAllMetadata(
@@ -430,8 +456,8 @@ export class Vrm {
      * Returns all VRM instances that are currently loaded.
      */
     static async findAll(): Promise<Vrm[]> {
-        const allMetadata = await Vrm.findAllMetadata();
-        return allMetadata.map(metadata => new Vrm(metadata.entity));
+        const entities = await Vrm.findAllEntities();
+        return entities.map(entity => new Vrm(entity));
     }
 
     private async fetch(path: string): Promise<Response> {

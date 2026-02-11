@@ -206,6 +206,34 @@ export interface VrmaInfo {
     playing: boolean;
 }
 
+/** Current look-at state of a VRM. */
+export type LookAtState =
+    | { type: "cursor" }
+    | { type: "target"; entity: number };
+
+/**
+ * Snapshot of a VRM instance with full runtime state.
+ *
+ * @example
+ * ```typescript
+ * const snapshots = await Vrm.findAllDetailed();
+ * for (const s of snapshots) {
+ *   console.log(`${s.name}: ${s.state} at (${s.globalViewport?.x}, ${s.globalViewport?.y})`);
+ * }
+ * ```
+ */
+export interface VrmSnapshot {
+    entity: number;
+    name: string;
+    state: string;
+    transform: Transform;
+    globalViewport: GlobalViewport | null;
+    expressions: ExpressionsResponse;
+    animations: VrmaInfo[];
+    lookAt: LookAtState | null;
+    linkedWebviews: number[];
+}
+
 /** Request body for setting VRMA playback speed. */
 export interface VrmaSpeedBody {
     asset: string;
