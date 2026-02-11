@@ -1,11 +1,23 @@
-import {Transform} from "./math";
+import {
+    TransformArgs,
+    GlobalViewport,
+    SubtitleOptions,
+    VoiceVoxRequest,
+    ExpressionsResponse,
+    ExpressionWeightResponse,
+    SpringBoneChainsResponse,
+    SpringBoneChain,
+    SpringBoneProps,
+    VrmaPlayRequest,
+    VrmaState,
+    VrmaInfo,
+} from "./math";
 import {host} from "./host";
 import {EventSource} from "eventSource";
 import {entities} from "./entities";
-import {Vrma} from "./vrma";
 
 export interface SpawnVrmOptions {
-    transform?: Partial<Transform>;
+    transform?: TransformArgs;
 }
 
 export interface SpeakOnVoiceVoxOptions {
@@ -22,27 +34,9 @@ export interface SpeakOnVoiceVoxOptions {
      */
     waitForCompletion?: boolean;
     /**
-     * The speed scale of the speech.
-     * The default value is 1.0.
+     * Subtitle display options.
      */
-    subtitle?: SubtitleOptions,
-}
-
-export interface SubtitleOptions {
-    /**
-     * The mod asset ID of the font to use for the subtitle text.
-     */
-    font?: string;
-    /**
-     * The font size of the subtitle text.
-     */
-    fontSize?: number;
-    /**
-     * The color of the subtitle text.
-     * The values are in the range of 0 to 1.
-     * The format is [r, g, b, a].
-     */
-    color?: [number, number, number, number];
+    subtitle?: SubtitleOptions;
 }
 
 export interface VrmPointerEvent {
@@ -85,7 +79,11 @@ export type EventMap = {
     "pointer-over": VrmPointerEvent;
     "pointer-out": VrmPointerEvent;
     "pointer-cancel": VrmPointerEvent;
+    "pointer-move": VrmPointerEvent;
     "state-change": VrmStateChangeEvent;
+    "expression-change": VrmStateChangeEvent;
+    "vrma-play": VrmStateChangeEvent;
+    "vrma-finish": VrmStateChangeEvent;
 };
 
 export interface VrmMetadata {
@@ -156,7 +154,7 @@ export class Vrm {
     /**
      * Returns the current state of the VRM.
      */
-    async state() {
+    async state(): Promise<string> {
         const response = await this.fetch("state");
         const json = await response.json() as { state: string };
         return json.state;
@@ -187,17 +185,145 @@ export class Vrm {
     }
 
     /**
-     * Returns a VRMA instance.
-     * If the VRMA does not exist, spawn a new one and return it.
+     * Gets or spawns a VRMA entity for the given asset.
      *
-     * @param source The vrma path relative to the mods directory.
+     * @param asset The asset ID of the VRMA animation.
+     * @returns The VRMA entity ID.
      */
-    async vrma(source: string) {
+    async vrma(asset: string): Promise<number> {
         const response = await host.get(host.createUrl(`vrm/${this.entity}/vrma`, {
-            source,
+            asset,
         }));
-        const vrmaEntity = Number(await response.json());
-        return new Vrma(vrmaEntity);
+        return Number(await response.json());
+    }
+
+    /**
+     * Despawns this VRM entity.
+     */
+    async despawn(): Promise<void> {
+        await host.deleteMethod(host.createUrl(`vrm/${this.entity}/despawn`));
+    }
+
+    /**
+     * Moves the VRM to a global viewport position.
+     *
+     * @param globalViewport The target viewport position.
+     */
+    async moveTo(globalViewport: GlobalViewport): Promise<void> {
+        await this.post("move", {globalViewport});
+    }
+
+    /**
+     * Gets all expressions and their current weights.
+     */
+    async expressions(): Promise<ExpressionsResponse> {
+        const response = await this.fetch("expressions");
+        return await response.json() as ExpressionsResponse;
+    }
+
+    /**
+     * Sets multiple expression weights at once.
+     *
+     * @param weights A record of expression names to weight values.
+     */
+    async setExpressions(weights: Record<string, number>): Promise<void> {
+        await this.put("expressions", weights);
+    }
+
+    /**
+     * Gets the weight of a single expression.
+     *
+     * @param name The expression name.
+     * @returns The expression weight value.
+     */
+    async expression(name: string): Promise<number> {
+        const response = await host.get(host.createUrl(`vrm/${this.entity}/expressions/${name}`));
+        const json = await response.json() as ExpressionWeightResponse;
+        return json.weight;
+    }
+
+    /**
+     * Sets the weight of a single expression.
+     *
+     * @param name The expression name.
+     * @param weight The weight value to set.
+     */
+    async setExpression(name: string, weight: number): Promise<void> {
+        await host.put(host.createUrl(`vrm/${this.entity}/expressions/${name}`), {weight});
+    }
+
+    /**
+     * Gets all spring bone chains.
+     */
+    async springBones(): Promise<SpringBoneChainsResponse> {
+        const response = await this.fetch("spring-bones");
+        return await response.json() as SpringBoneChainsResponse;
+    }
+
+    /**
+     * Gets a single spring bone chain by index.
+     *
+     * @param chainId The chain index.
+     */
+    async springBone(chainId: number): Promise<SpringBoneChain> {
+        const response = await host.get(host.createUrl(`vrm/${this.entity}/spring-bones/${chainId}`));
+        return await response.json() as SpringBoneChain;
+    }
+
+    /**
+     * Updates spring bone properties for a chain.
+     *
+     * @param chainId The chain index.
+     * @param props Partial properties to update.
+     */
+    async setSpringBone(chainId: number, props: Partial<SpringBoneProps>): Promise<void> {
+        await host.put(host.createUrl(`vrm/${this.entity}/spring-bones/${chainId}`), props);
+    }
+
+    /**
+     * Gets all VRMA animations for this VRM.
+     */
+    async allVrma(): Promise<VrmaInfo[]> {
+        const response = await host.get(host.createUrl(`vrm/${this.entity}/vrma/all`));
+        return await response.json() as VrmaInfo[];
+    }
+
+    /**
+     * Plays a VRMA animation.
+     *
+     * @param options Play request options including asset, repeat, transition.
+     */
+    async playVrma(options: VrmaPlayRequest): Promise<void> {
+        await this.post("vrma/play", options);
+    }
+
+    /**
+     * Stops a VRMA animation.
+     *
+     * @param asset The asset ID of the VRMA animation to stop.
+     */
+    async stopVrma(asset: string): Promise<void> {
+        await host.post(host.createUrl(`vrm/${this.entity}/vrma/stop`, {asset}));
+    }
+
+    /**
+     * Gets the state of a VRMA animation.
+     *
+     * @param asset The asset ID of the VRMA animation to query.
+     */
+    async vrmaState(asset: string): Promise<VrmaState> {
+        const response = await host.get(host.createUrl(`vrm/${this.entity}/vrma/state`, {asset}));
+        return await response.json() as VrmaState;
+    }
+
+    /**
+     * Sets the playback speed of a VRMA animation.
+     *
+     * @param asset The asset ID of the VRMA animation.
+     * @param speed The playback speed.
+     */
+    async setVrmaSpeed(asset: string, speed: number): Promise<void> {
+        await host.put(host.createUrl(`vrm/${this.entity}/vrma/speed`), {asset, speed});
     }
 
     /**
@@ -242,7 +368,7 @@ export class Vrm {
     static async spawn(asset: string, options?: SpawnVrmOptions): Promise<Vrm> {
         const response = await host.post(host.createUrl("vrm"), {
             asset,
-            ...options
+            transform: options?.transform,
         });
         return new Vrm(Number(await response.text()));
     }
@@ -253,7 +379,12 @@ export class Vrm {
      * @param vrmName VRM avatar name
      */
     static async findByName(vrmName: string): Promise<Vrm> {
-        return new Vrm(Number(await entities.findByName(vrmName)));
+        const response = await host.get(host.createUrl("vrm", {name: vrmName}));
+        const vrms = await response.json() as VrmMetadata[];
+        if (vrms.length === 0) {
+            throw new Error(`VRM not found: ${vrmName}`);
+        }
+        return new Vrm(vrms[0].entity);
     }
 
     /**
@@ -269,14 +400,14 @@ export class Vrm {
     }
 
     static async findAllMetadata(): Promise<VrmMetadata[]> {
-        const response = await host.get(host.createUrl("vrm/all"));
+        const response = await host.get(host.createUrl("vrm"));
         return await response.json();
     }
 
     static streamAllMetadata(
         f: (vrm: VrmMetadata) => (void | Promise<void>)
     ): EventSource {
-        const es = new EventSource(host.createUrl("vrm/all?stream=true"));
+        const es = new EventSource(host.createUrl("vrm/stream"));
         es.addEventListener("message", (e) => {
             f(JSON.parse(e.data));
         });
@@ -307,7 +438,7 @@ export class Vrm {
         return await host.get(host.createUrl(`vrm/${this.entity}/${path}`));
     }
 
-    private async post(path: string, body: object) {
+    private async post(path: string, body?: object): Promise<Response> {
         return await host.post(host.createUrl(`vrm/${this.entity}/${path}`), body);
     }
 
@@ -319,4 +450,3 @@ export class Vrm {
         await host.deleteMethod(host.createUrl(`vrm/${this.entity}/${path}`));
     }
 }
-
