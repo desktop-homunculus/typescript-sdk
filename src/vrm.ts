@@ -303,7 +303,7 @@ export class Vrm {
      * @param asset The asset ID of the VRMA animation to stop.
      */
     async stopVrma(asset: string): Promise<void> {
-        await host.post(host.createUrl(`vrm/${this.entity}/vrma/stop`, {asset}));
+        await this.post("vrma/stop", { asset });
     }
 
     /**
