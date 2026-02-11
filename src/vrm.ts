@@ -13,6 +13,7 @@ import {
     VrmaInfo,
     VrmSnapshot,
     Persona,
+    PositionResponse,
 } from "./math";
 import {host} from "./host";
 import {EventSource} from "eventSource";
@@ -234,6 +235,22 @@ export class Vrm {
      */
     async despawn(): Promise<void> {
         await host.deleteMethod(host.createUrl(`vrm/${this.entity}/despawn`));
+    }
+
+    /**
+     * Gets the current position of this VRM in both screen and world coordinates.
+     *
+     * @example
+     * ```ts
+     * const vrm = await Vrm.findByName("MyCharacter");
+     * const pos = await vrm.position();
+     * console.log(`Screen: (${pos.globalViewport?.x}, ${pos.globalViewport?.y})`);
+     * console.log(`World: (${pos.world.x}, ${pos.world.y}, ${pos.world.z})`);
+     * ```
+     */
+    async position(): Promise<PositionResponse> {
+        const response = await this.fetch("position");
+        return await response.json() as PositionResponse;
     }
 
     /**

@@ -286,6 +286,24 @@ export interface VrmSnapshot {
     persona: Persona;
 }
 
+/**
+ * Response from the VRM position endpoint.
+ *
+ * @example
+ * ```ts
+ * const vrm = await Vrm.findByName("MyCharacter");
+ * const pos = await vrm.position();
+ * console.log(`Screen: (${pos.globalViewport?.x}, ${pos.globalViewport?.y})`);
+ * console.log(`World: (${pos.world.x}, ${pos.world.y}, ${pos.world.z})`);
+ * ```
+ */
+export interface PositionResponse {
+    /** Global screen coordinates (multi-monitor origin at leftmost screen). Null if not visible. */
+    globalViewport: GlobalViewport | null;
+    /** Bevy world coordinates. */
+    world: Vec3;
+}
+
 /** Request body for setting VRMA playback speed. */
 export interface VrmaSpeedBody {
     asset: string;
