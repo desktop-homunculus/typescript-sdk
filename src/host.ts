@@ -17,14 +17,52 @@
  * // URL construction with parameters
  * const url = host.createUrl("vrm", { name: "MyCharacter" });
  * // Results in: http://localhost:3100/vrm?name=MyCharacter
+ *
+ * // Configure the base URL (e.g., from an MCP server)
+ * host.configure({ baseUrl: "http://localhost:4000" });
  * ```
  */
-export namespace host {
-    /** The base URL for the Desktop Homunculus HTTP server */
-    export const base = "http://localhost:3100";
 
-    /** Creates a new URL instance pointing to the base server */
-    export const baseUrl = () => new URL("http://localhost:3100")
+/** Error thrown when the Homunculus HTTP API returns a non-OK response. */
+export class HomunculusApiError extends Error {
+    /** HTTP status code (e.g. 404, 500) */
+    readonly statusCode: number;
+    /** The request endpoint URL */
+    readonly endpoint: string;
+    /** The response body text */
+    readonly body: string;
+
+    constructor(statusCode: number, endpoint: string, body: string) {
+        super(`${endpoint}: ${statusCode} ${body}`);
+        this.name = "HomunculusApiError";
+        this.statusCode = statusCode;
+        this.endpoint = endpoint;
+        this.body = body;
+    }
+}
+
+export namespace host {
+    let _baseUrl = "http://localhost:3100";
+
+    /**
+     * Configures the SDK's base URL for the Desktop Homunculus HTTP server.
+     *
+     * @param options - Configuration options
+     *
+     * @example
+     * ```typescript
+     * host.configure({ baseUrl: "http://localhost:4000" });
+     * ```
+     */
+    export const configure = (options: { baseUrl: string }) => {
+        _baseUrl = options.baseUrl.replace(/\/+$/, "");
+    };
+
+    /** Returns the base URL for the Desktop Homunculus HTTP server. */
+    export const base = (): string => _baseUrl;
+
+    /** Creates a new URL instance pointing to the base server. */
+    export const baseUrl = (): URL => new URL(_baseUrl);
 
     /**
      * Creates a URL for the Desktop Homunculus API with optional query parameters.
@@ -45,7 +83,7 @@ export namespace host {
      * ```
      */
     export const createUrl = (path: string, params?: object): URL => {
-        const url = new URL(path, base);
+        const url = new URL(path, base());
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
                 url.searchParams.append(key, String(value));
@@ -59,7 +97,7 @@ export namespace host {
      *
      * @param url - The URL to send the GET request to
      * @returns The Response object if successful
-     * @throws Will throw an error if the response is not ok (status >= 400)
+     * @throws {HomunculusApiError} If the response status is >= 400
      *
      * @example
      * ```typescript
@@ -79,7 +117,7 @@ export namespace host {
      * @param url - The URL to send the POST request to
      * @param body - Optional request body that will be JSON-serialized
      * @returns The Response object if successful
-     * @throws Will throw an error if the response is not ok (status >= 400)
+     * @throws {HomunculusApiError} If the response status is >= 400
      *
      * @example
      * ```typescript
@@ -107,7 +145,7 @@ export namespace host {
      * @param url - The URL to send the PUT request to
      * @param body - Optional request body that will be JSON-serialized
      * @returns The Response object if successful
-     * @throws Will throw an error if the response is not ok (status >= 400)
+     * @throws {HomunculusApiError} If the response status is >= 400
      *
      * @example
      * ```typescript
@@ -135,7 +173,7 @@ export namespace host {
      * @param url - The URL to send the PATCH request to
      * @param body - Optional request body that will be JSON-serialized
      * @returns The Response object if successful
-     * @throws Will throw an error if the response is not ok (status >= 400)
+     * @throws {HomunculusApiError} If the response status is >= 400
      */
     export const patch = async (url: URL, body?: any): Promise<Response> => {
         const response = await fetch(url, {
@@ -158,14 +196,12 @@ export namespace host {
     }
 }
 
-/**
- * Internal helper function that throws an error if the HTTP response indicates failure.
- *
- * @param response - The Response object to check
- * @throws Will throw a detailed error if response.ok is false
- */
 const throwIfError = async (response: Response): Promise<void> => {
     if (!response.ok) {
-        throw new Error(`url: ${response.url}\nStatus ${response.statusText}\n${await response.text()}`);
+        throw new HomunculusApiError(
+            response.status,
+            response.url,
+            await response.text()
+        );
     }
 }

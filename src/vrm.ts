@@ -16,7 +16,7 @@ import {
     PositionResponse,
 } from "./math";
 import {host} from "./host";
-import {EventSource} from "eventSource";
+import {EventSource} from "eventsource";
 import {entities} from "./entities";
 
 export interface SpawnVrmOptions {

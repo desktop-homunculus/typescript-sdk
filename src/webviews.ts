@@ -117,12 +117,29 @@ export class Webview {
     }
 
     /**
-     * Takes a screenshot of the webview.
+     * Navigates the webview back in history.
      *
-     * @returns The raw Response containing the PNG image
+     * @example
+     * ```typescript
+     * const wv = (await Webview.all())[0];
+     * await new Webview(wv.entity).navigateBack();
+     * ```
      */
-    async screenshot(): Promise<Response> {
-        return await host.get(host.createUrl(`webviews/${this.entity}/screenshot`));
+    async navigateBack(): Promise<void> {
+        await host.post(host.createUrl(`webviews/${this.entity}/navigate/back`));
+    }
+
+    /**
+     * Navigates the webview forward in history.
+     *
+     * @example
+     * ```typescript
+     * const wv = (await Webview.all())[0];
+     * await new Webview(wv.entity).navigateForward();
+     * ```
+     */
+    async navigateForward(): Promise<void> {
+        await host.post(host.createUrl(`webviews/${this.entity}/navigate/forward`));
     }
 
     /**

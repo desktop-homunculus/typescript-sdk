@@ -52,3 +52,4 @@ export * from "./signals";
 export * from "./entities";
 export * from "./app";
 export * from "./mods";
+export * from "./assets";
