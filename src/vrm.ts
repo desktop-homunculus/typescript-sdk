@@ -186,19 +186,6 @@ export class Vrm {
     }
 
     /**
-     * Gets or spawns a VRMA entity for the given asset.
-     *
-     * @param asset The asset ID of the VRMA animation.
-     * @returns The VRMA entity ID.
-     */
-    async vrma(asset: string): Promise<number> {
-        const response = await host.get(host.createUrl(`vrm/${this.entity}/vrma`, {
-            asset,
-        }));
-        return Number(await response.json());
-    }
-
-    /**
      * Despawns this VRM entity.
      */
     async despawn(): Promise<void> {
@@ -285,7 +272,7 @@ export class Vrm {
      * Gets all VRMA animations for this VRM.
      */
     async allVrma(): Promise<VrmaInfo[]> {
-        const response = await host.get(host.createUrl(`vrm/${this.entity}/vrma/all`));
+        const response = await host.get(host.createUrl(`vrm/${this.entity}/vrma`));
         return await response.json() as VrmaInfo[];
     }
 
