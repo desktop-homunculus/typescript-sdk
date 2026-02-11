@@ -23,6 +23,65 @@ import { host } from "./host";
 
 export namespace mods {
     /**
+     * Summary information about a loaded mod.
+     *
+     * @example
+     * ```typescript
+     * const allMods = await mods.list();
+     * for (const mod of allMods) {
+     *   console.log(`${mod.name}@${mod.version} (${mod.bin_commands.length} commands)`);
+     * }
+     * ```
+     */
+    export interface ModInfo {
+        /** The mod package name. */
+        name: string;
+        /** The mod package version. */
+        version: string;
+        /** Optional description from package.json. */
+        description?: string;
+        /** Optional author from package.json. */
+        author?: string;
+        /** Optional license from package.json. */
+        license?: string;
+        /** Whether the mod has a main script (auto-executed at startup). */
+        has_main: boolean;
+        /** Available bin command names. */
+        bin_commands: string[];
+        /** Asset IDs registered by this mod. */
+        asset_ids: string[];
+    }
+
+    /**
+     * List all loaded mods and their metadata.
+     *
+     * Returns summary information for every mod discovered at startup,
+     * including available bin commands and registered asset IDs.
+     *
+     * @returns Array of mod information objects
+     *
+     * @example
+     * ```typescript
+     * // List all installed mods
+     * const allMods = await mods.list();
+     * console.log(`${allMods.length} mods installed`);
+     *
+     * // Find mods with bin commands
+     * const withCommands = allMods.filter(m => m.bin_commands.length > 0);
+     *
+     * // Get asset IDs from a specific mod
+     * const elmer = allMods.find(m => m.name === "elmer");
+     * if (elmer) {
+     *   console.log("Elmer assets:", elmer.asset_ids);
+     * }
+     * ```
+     */
+    export async function list(): Promise<ModInfo[]> {
+        const response = await host.get(host.createUrl("mods"));
+        return await response.json();
+    }
+
+    /**
      * Options for executing a mod bin command.
      *
      * @example
