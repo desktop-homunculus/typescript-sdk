@@ -5,7 +5,7 @@ TypeScript SDK for building mods and extensions for [Desktop Homunculus](https:/
 ## Install
 
 ```bash
-pnpm add @homunculus/api@https://github.com/desktop-homunculus/typescript-sdk
+npm install @homunculus/api@https://github.com/desktop-homunculus/typescript-sdk
 ```
 
 ## Quick Start

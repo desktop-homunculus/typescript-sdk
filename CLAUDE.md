@@ -9,10 +9,10 @@ TypeScript SDK (`@homunculus/api`) for building mods and extensions for Desktop 
 ## Commands
 
 ```bash
-pnpm install          # Install dependencies
-pnpm run build        # Production build (Rollup)
-pnpm run dev          # Watch mode build
-pnpm run check-types  # Type-check without emitting
+npm install           # Install dependencies
+npm run build         # Production build (Rollup)
+npm run dev           # Watch mode build
+npm run check-types   # Type-check without emitting
 ```
 
 No test framework is configured. No linter or formatter is configured.

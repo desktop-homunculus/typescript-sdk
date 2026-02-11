@@ -23,7 +23,7 @@
   "files": [
     "dist"
   ],
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "npm@11.8.0",
   "dependencies": {
     "eventsource": "^4.1.0",
     "ts-node": "^10.9.2",
