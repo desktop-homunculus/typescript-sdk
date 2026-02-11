@@ -1,16 +1,14 @@
 import {host} from "./host";
 
 /**
- * Effects API namespace for playing visual and audio effects.
+ * Effects API namespace for visual effects.
  *
- * Provides functionality to trigger various effects that enhance the user experience,
- * including sound effects and visual stamp effects.
+ * Provides functionality to trigger visual stamp effects that enhance the user experience.
+ *
+ * For audio playback, see the {@link audio} namespace.
  *
  * @example
  * ```typescript
- * // Play a sound effect
- * await effects.sound("notification-ding");
- *
  * // Show a stamp effect
  * await effects.stamp("heart-reaction", {
  *   width: 100,
@@ -36,17 +34,6 @@ export namespace effects {
         alpha?: number;
         /** Duration in seconds. */
         duration?: number;
-    }
-
-    /**
-     * Plays a sound effect from a mod asset.
-     *
-     * @param asset - The asset ID of the sound effect.
-     */
-    export const sound = async (asset: string) => {
-        await host.post(host.createUrl(`effects/sounds`), {
-            asset,
-        });
     }
 
     /**

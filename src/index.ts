@@ -40,6 +40,7 @@
 
 export * from "./coordinates";
 export * from "./displays";
+export * from "./audio";
 export * from "./effects";
 export * from "./host";
 export * from "./preferences";

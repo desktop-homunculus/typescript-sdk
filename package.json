@@ -5,8 +5,15 @@
   "author": "notelm",
   "license": "ISC",
   "type": "module",
-  "main": "dist/index",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "keywords": [],
   "scripts": {
     "dev": "rollup -c --configPlugin typescript --watch",
