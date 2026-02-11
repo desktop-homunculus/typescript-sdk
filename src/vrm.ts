@@ -12,6 +12,7 @@ import {
     VrmaState,
     VrmaInfo,
     VrmSnapshot,
+    Persona,
 } from "./math";
 import {host} from "./host";
 import {EventSource} from "eventSource";
@@ -19,6 +20,7 @@ import {entities} from "./entities";
 
 export interface SpawnVrmOptions {
     transform?: TransformArgs;
+    persona?: Persona;
 }
 
 export interface SpeakOnVoiceVoxOptions {
@@ -70,6 +72,13 @@ export interface VrmStateChangeEvent {
     state: string;
 }
 
+export interface PersonaChangeEvent {
+    /**
+     * The updated persona.
+     */
+    persona: Persona;
+}
+
 export type EventMap = {
     "drag-start": VrmPointerEvent;
     "drag": VrmDragEvent;
@@ -85,6 +94,7 @@ export type EventMap = {
     "expression-change": VrmStateChangeEvent;
     "vrma-play": VrmStateChangeEvent;
     "vrma-finish": VrmStateChangeEvent;
+    "persona-change": PersonaChangeEvent;
 };
 
 export interface VrmMetadata {
@@ -168,6 +178,40 @@ export class Vrm {
      */
     async setState(state: string): Promise<void> {
         await this.put("state", {state});
+    }
+
+    /**
+     * Returns the persona of the VRM.
+     *
+     * @example
+     * ```typescript
+     * const vrm = await Vrm.findByName("MyAvatar");
+     * const persona = await vrm.persona();
+     * console.log(persona.profile);
+     * ```
+     */
+    async persona(): Promise<Persona> {
+        const response = await this.fetch("persona");
+        return await response.json() as Persona;
+    }
+
+    /**
+     * Sets the persona of the VRM.
+     *
+     * @param persona The persona data to set.
+     *
+     * @example
+     * ```typescript
+     * const vrm = await Vrm.findByName("MyAvatar");
+     * await vrm.setPersona({
+     *   profile: "A cheerful assistant",
+     *   ocean: { openness: 0.8, extraversion: 0.7 },
+     *   metadata: {},
+     * });
+     * ```
+     */
+    async setPersona(persona: Persona): Promise<void> {
+        await this.put("persona", persona);
     }
 
     /**
@@ -357,6 +401,7 @@ export class Vrm {
         const response = await host.post(host.createUrl("vrm"), {
             asset,
             transform: options?.transform,
+            persona: options?.persona,
         });
         return new Vrm(Number(await response.text()));
     }

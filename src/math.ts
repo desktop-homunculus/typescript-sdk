@@ -109,6 +109,57 @@ export interface GlobalViewport {
     y: number;
 }
 
+// --- Persona types ---
+
+/**
+ * Big Five personality traits (OCEAN model).
+ *
+ * @example
+ * ```typescript
+ * const ocean: Ocean = {
+ *   openness: 0.8,
+ *   conscientiousness: 0.6,
+ *   extraversion: 0.7,
+ * };
+ * ```
+ */
+export interface Ocean {
+    /** Openness (0.0=conservative, 1.0=curious) */
+    openness?: number;
+    /** Conscientiousness (0.0=spontaneous, 1.0=organized) */
+    conscientiousness?: number;
+    /** Extraversion (0.0=introverted, 1.0=extroverted) */
+    extraversion?: number;
+    /** Agreeableness (0.0=independent, 1.0=cooperative) */
+    agreeableness?: number;
+    /** Neuroticism (0.0=stable, 1.0=sensitive) */
+    neuroticism?: number;
+}
+
+/**
+ * Persona data for a VRM character.
+ *
+ * @example
+ * ```typescript
+ * const persona: Persona = {
+ *   profile: "A cheerful virtual assistant",
+ *   personality: "Friendly and helpful",
+ *   ocean: { openness: 0.8, extraversion: 0.7 },
+ *   metadata: {},
+ * };
+ * ```
+ */
+export interface Persona {
+    /** Character profile/background description. */
+    profile: string;
+    /** Personality description in natural language. */
+    personality?: string | null;
+    /** Big Five personality parameters. */
+    ocean: Ocean;
+    /** Extension metadata for MODs. */
+    metadata: Record<string, unknown>;
+}
+
 // --- VRM types ---
 
 /** Response for VRM state queries. */
@@ -232,6 +283,7 @@ export interface VrmSnapshot {
     animations: VrmaInfo[];
     lookAt: LookAtState | null;
     linkedWebviews: number[];
+    persona: Persona;
 }
 
 /** Request body for setting VRMA playback speed. */
