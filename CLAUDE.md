@@ -31,7 +31,7 @@ All source is in `src/`. Each file is a TypeScript namespace that maps to a doma
 
 ### Communication Layer
 - **`host.ts`** — Internal HTTP client. All other modules use `host.get/post/put/deleteMethod` with `host.createUrl(path, params?)` to talk to the Bevy server at `localhost:3100`. Do not use `fetch` directly; go through `host`.
-- **`commands.ts`** — Cross-process pub/sub via SSE (`EventSource`). `commands.stream<V>()` subscribes, `commands.send<V>()` publishes.
+- **`signals.ts`** — Cross-process pub/sub via SSE (`EventSource`). `signals.stream<V>()` subscribes, `signals.send<V>()` publishes.
 
 ### Core Modules
 - **`vrm.ts`** — VRM 3D character lifecycle: spawn, find, events (pointer-click, drag, state changes), voice synthesis (VoiceVox). Largest module.

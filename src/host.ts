@@ -6,17 +6,17 @@
  * and HTTP methods with automatic error handling.
  *
  * **Note:** This module is primarily for internal SDK use. Most developers should
- * use the higher-level namespaces like `gpt`, `vrm`, `commands`, etc.
+ * use the higher-level namespaces like `vrm`, `signals`, etc.
  *
  * @example
  * ```typescript
  * // Internal SDK usage (you typically won't need this directly)
- * const response = await host.get(host.createUrl("vrm/all"));
+ * const response = await host.get(host.createUrl("vrm"));
  * const vrms = await response.json();
  *
  * // URL construction with parameters
- * const url = host.createUrl("gpt/model", { vrm: 123 });
- * // Results in: http://localhost:3100/gpt/model?vrm=123
+ * const url = host.createUrl("vrm", { name: "MyCharacter" });
+ * // Results in: http://localhost:3100/vrm?name=MyCharacter
  * ```
  */
 export namespace host {
@@ -36,8 +36,8 @@ export namespace host {
      * @example
      * ```typescript
      * // Simple path
-     * const url = host.createUrl("vrm/all");
-     * // Result: http://localhost:3100/vrm/all
+     * const url = host.createUrl("vrm");
+     * // Result: http://localhost:3100/vrm
      *
      * // With query parameters
      * const url = host.createUrl("entities", { name: "VRM", root: 123 });
@@ -63,7 +63,7 @@ export namespace host {
      *
      * @example
      * ```typescript
-     * const response = await host.get(host.createUrl("vrm/all"));
+     * const response = await host.get(host.createUrl("vrm"));
      * const data = await response.json();
      * ```
      */
@@ -84,10 +84,9 @@ export namespace host {
      * @example
      * ```typescript
      * const response = await host.post(
-     *   host.createUrl("gpt/chat"),
-     *   { userMessage: "Hello!", options: { vrm: 123 } }
+     *   host.createUrl("vrm"),
+     *   { asset: "my-mod::character.vrm" }
      * );
-     * const chatResponse = await response.json();
      * ```
      */
     export const post = async (url: URL, body?: any): Promise<Response> => {
@@ -113,14 +112,34 @@ export namespace host {
      * @example
      * ```typescript
      * await host.put(
-     *   host.createUrl("gpt/model"),
-     *   { model: "gpt-4", vrm: 123 }
+     *   host.createUrl("vrm/123/state"),
+     *   { state: "idle" }
      * );
      * ```
      */
     export const put = async (url: URL, body?: any): Promise<Response> => {
         const response = await fetch(url, {
             method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body ?? {})
+        });
+        await throwIfError(response);
+        return response;
+    }
+
+    /**
+     * Performs a PATCH request with JSON payload and automatic error handling.
+     *
+     * @param url - The URL to send the PATCH request to
+     * @param body - Optional request body that will be JSON-serialized
+     * @returns The Response object if successful
+     * @throws Will throw an error if the response is not ok (status >= 400)
+     */
+    export const patch = async (url: URL, body?: any): Promise<Response> => {
+        const response = await fetch(url, {
+            method: "PATCH",
             headers: {
                 "Content-Type": "application/json"
             },
