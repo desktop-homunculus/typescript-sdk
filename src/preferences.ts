@@ -14,6 +14,31 @@ import {host} from "./host";
  */
 export namespace preferences {
     /**
+     * List all saved preference keys.
+     *
+     * Returns an array of key names that have been stored.
+     * Use {@link preferences.load} to retrieve the value for a specific key.
+     *
+     * @returns Array of preference key names
+     *
+     * @example
+     * ```typescript
+     * const keys = await preferences.list();
+     * console.log(`${keys.length} preferences stored`);
+     *
+     * // Load all preferences
+     * for (const key of keys) {
+     *   const value = await preferences.load(key);
+     *   console.log(`${key}:`, value);
+     * }
+     * ```
+     */
+    export const list = async (): Promise<string[]> => {
+        const response = await host.get(host.createUrl("preferences"));
+        return await response.json();
+    }
+
+    /**
      * Loads a value from the preference store with type safety.
      *
      * @template V - The expected type of the stored value
