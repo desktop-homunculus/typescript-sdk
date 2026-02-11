@@ -82,6 +82,24 @@ export namespace mods {
     }
 
     /**
+     * Get detailed information about a specific mod by name.
+     *
+     * @param modName - The mod package name
+     * @returns Mod information
+     *
+     * @example
+     * ```typescript
+     * const elmer = await mods.get("elmer");
+     * console.log(`${elmer.name}@${elmer.version}`);
+     * console.log("Commands:", elmer.bin_commands);
+     * ```
+     */
+    export async function get(modName: string): Promise<ModInfo> {
+        const response = await host.get(host.createUrl(`mods/${modName}`));
+        return await response.json();
+    }
+
+    /**
      * Options for executing a mod bin command.
      *
      * @example
