@@ -517,7 +517,7 @@ export class Vrm {
         return await host.post(host.createUrl(`vrm/${this.entity}/${path}`), body);
     }
 
-    private async put(path: string, body?: any) {
+    private async put(path: string, body?: object) {
         await host.put(host.createUrl(`vrm/${this.entity}/${path}`), body);
     }
 

@@ -127,7 +127,7 @@ export namespace host {
      * );
      * ```
      */
-    export const post = async (url: URL, body?: any): Promise<Response> => {
+    export const post = async <B>(url: URL, body?: B): Promise<Response> => {
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -155,7 +155,7 @@ export namespace host {
      * );
      * ```
      */
-    export const put = async (url: URL, body?: any): Promise<Response> => {
+    export const put = async <B>(url: URL, body?: B): Promise<Response> => {
         const response = await fetch(url, {
             method: "PUT",
             headers: {
@@ -175,7 +175,7 @@ export namespace host {
      * @returns The Response object if successful
      * @throws {HomunculusApiError} If the response status is >= 400
      */
-    export const patch = async (url: URL, body?: any): Promise<Response> => {
+    export const patch = async <B>(url: URL, body?: B): Promise<Response> => {
         const response = await fetch(url, {
             method: "PATCH",
             headers: {
