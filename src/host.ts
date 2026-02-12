@@ -41,6 +41,19 @@ export class HomunculusApiError extends Error {
     }
 }
 
+/** Error thrown when an NDJSON stream contains malformed data. */
+export class HomunculusStreamError extends Error {
+    /** The raw line that failed to parse */
+    readonly rawLine: string;
+
+    constructor(rawLine: string, cause?: unknown) {
+        super(`Failed to parse NDJSON line: ${rawLine}`);
+        this.name = "HomunculusStreamError";
+        this.rawLine = rawLine;
+        if (cause) this.cause = cause;
+    }
+}
+
 export namespace host {
     let _baseUrl = "http://localhost:3100";
 
@@ -193,6 +206,80 @@ export namespace host {
         });
         await throwIfError(response);
         return response;
+    }
+
+    /**
+     * Performs a POST request and returns an async generator that yields
+     * parsed NDJSON objects from the streaming response.
+     *
+     * @param url - The URL to send the POST request to
+     * @param body - Optional request body that will be JSON-serialized
+     * @param signal - Optional AbortSignal for cancellation
+     * @returns An async generator yielding parsed JSON objects of type T
+     * @throws {HomunculusApiError} If the response status is >= 400
+     * @throws {HomunculusStreamError} If an NDJSON line cannot be parsed
+     *
+     * @example
+     * ```typescript
+     * const stream = host.postStream<MyEvent>(
+     *   host.createUrl("mods/my-mod/commands/execute"),
+     *   { command: "build" }
+     * );
+     * for await (const event of stream) {
+     *   console.log(event);
+     * }
+     * ```
+     */
+    export async function* postStream<T>(url: URL, body?: unknown, signal?: AbortSignal): AsyncGenerator<T> {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body ?? {}),
+            signal,
+        });
+        await throwIfError(response);
+
+        if (!response.body) {
+            return;
+        }
+
+        const reader = response.body
+            .pipeThrough(new TextDecoderStream())
+            .getReader();
+
+        let buffer = "";
+        try {
+            for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += value;
+                const lines = buffer.split("\n");
+                // Keep the last (possibly incomplete) chunk in the buffer
+                buffer = lines.pop()!;
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed.length === 0) continue;
+                    try {
+                        yield JSON.parse(trimmed) as T;
+                    } catch (e) {
+                        throw new HomunculusStreamError(trimmed, e);
+                    }
+                }
+            }
+            // Process any remaining data in the buffer
+            const trimmed = buffer.trim();
+            if (trimmed.length > 0) {
+                try {
+                    yield JSON.parse(trimmed) as T;
+                } catch (e) {
+                    throw new HomunculusStreamError(trimmed, e);
+                }
+            }
+        } finally {
+            reader.releaseLock();
+        }
     }
 }
 
