@@ -334,10 +334,34 @@ export interface ShadowPanelPutBody {
 
 // --- Webview types ---
 
+/**
+ * Webview source specification (request): URL/path or inline HTML.
+ *
+ * @example
+ * ```typescript
+ * // URL or mod asset path
+ * const urlSource: WebviewSource = { type: "url", url: "my-mod::ui.html" };
+ * // Inline HTML content
+ * const htmlSource: WebviewSource = { type: "html", content: "<h1>Hello</h1>" };
+ * ```
+ */
+export type WebviewSource =
+    | { type: "url"; url: string }
+    | { type: "html"; content: string };
+
+/**
+ * Webview source information (response).
+ * In list responses, Html content is omitted.
+ * In detail responses, Html content is included.
+ */
+export type WebviewSourceInfo =
+    | { type: "url"; url: string }
+    | { type: "html"; content?: string };
+
 /** Information about a webview instance. */
 export interface WebviewInfo {
     entity: number;
-    source: string;
+    source: WebviewSourceInfo;
     size: Vec2;
     viewportSize: Vec2;
     offset: Vec2;
@@ -346,7 +370,7 @@ export interface WebviewInfo {
 
 /** Options for opening a webview. */
 export interface WebviewOpenOptions {
-    source: string;
+    source: WebviewSource;
     transform: TransformArgs;
     parent?: number;
     linkedVrm?: number;
@@ -362,7 +386,7 @@ export interface WebviewPatchRequest {
 
 /** Request body for navigating a webview to a new source. */
 export interface WebviewNavigateRequest {
-    source: string;
+    source: WebviewSource;
 }
 
 /** Request body for setting a webview's linked VRM. */

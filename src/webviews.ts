@@ -3,6 +3,7 @@ import {
     WebviewOpenOptions,
     WebviewInfo,
     WebviewPatchRequest,
+    WebviewSource,
     Vec2,
 } from "./math";
 import {Vrm} from "./vrm";
@@ -16,7 +17,7 @@ import {Vrm} from "./vrm";
  * @example
  * ```typescript
  * const webview = await Webview.open({
- *   source: "my-mod::ui.html",
+ *   source: { type: "url", url: "my-mod::ui.html" },
  *   transform: {
  *     translation: { x: 0, y: 1.5, z: 0 },
  *   },
@@ -103,9 +104,18 @@ export class Webview {
     /**
      * Navigates the webview to a new source.
      *
-     * @param source - The new source URL or mod asset path
+     * @param source - The new source (URL/path or inline HTML)
+     *
+     * @example
+     * ```typescript
+     * const wv = new Webview(entity);
+     * // Navigate to a mod asset
+     * await wv.navigate({ type: "url", url: "my-mod::page.html" });
+     * // Navigate to inline HTML
+     * await wv.navigate({ type: "html", content: "<h1>Hello</h1>" });
+     * ```
      */
-    async navigate(source: string): Promise<void> {
+    async navigate(source: WebviewSource): Promise<void> {
         await host.post(host.createUrl(`webviews/${this.entity}/navigate`), {source});
     }
 
@@ -194,12 +204,21 @@ export class Webview {
      *
      * @example
      * ```typescript
+     * // Open with a mod asset URL
      * const panel = await Webview.open({
-     *   source: "my-mod::settings.html",
+     *   source: { type: "url", url: "my-mod::settings.html" },
      *   transform: {
      *     translation: { x: 0, y: 2, z: -1 },
      *   },
      *   viewportSize: [800, 600]
+     * });
+     *
+     * // Open with inline HTML
+     * const inline = await Webview.open({
+     *   source: { type: "html", content: "<h1>Hello World</h1>" },
+     *   transform: {
+     *     translation: { x: 0, y: 1, z: 0 },
+     *   },
      * });
      * ```
      */
