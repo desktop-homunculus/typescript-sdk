@@ -403,8 +403,23 @@ export class Vrm {
 
     /**
      * Speaks the given text using VoiceVox.
-     * Please make sure that the VoiceVox server is running.
-     * Note that if the server isn't running, no error will be thrown and nothing will happen.
+     *
+     * @deprecated Use the VoiceVox MOD command instead.
+     * Install the `voicevox` MOD and execute the `speak` command:
+     *
+     * @example Migration:
+     * ```typescript
+     * // Before (deprecated):
+     * await vrm.speakOnVoiceVox("こんにちは");
+     *
+     * // After (using VoiceVox MOD command):
+     * import { mods } from "@homunculus/api";
+     * await mods.executeCommand("voicevox", {
+     *   command: "speak",
+     *   stdin: JSON.stringify({ entity: vrm.entity, text: "こんにちは" }),
+     *   timeoutMs: 60000,
+     * });
+     * ```
      */
     async speakOnVoiceVox(sentences: string[] | string, options?: SpeakOnVoiceVoxOptions) {
         const response = await this.post("speech/voicevox", {
