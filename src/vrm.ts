@@ -24,6 +24,32 @@ export interface SpawnVrmOptions {
     persona?: Persona;
 }
 
+/**
+ * A single keyframe in a speech timeline.
+ */
+export interface TimelineKeyframe {
+    /**
+     * Duration of this keyframe in seconds.
+     */
+    duration: number;
+    /**
+     * Expression targets to set during this keyframe.
+     * Keys are expression names (e.g. "aa", "ih", "happy"), values are weights (0.0-1.0).
+     */
+    targets?: Record<string, number>;
+}
+
+/**
+ * Options for the timeline speech API.
+ */
+export interface SpeakTimelineOptions {
+    /**
+     * If true, the method will wait for the speech to complete.
+     * Defaults to true.
+     */
+    waitForCompletion?: boolean;
+}
+
 export interface SpeakOnVoiceVoxOptions {
     /**
      * The voice vox speaker ID.
@@ -386,6 +412,44 @@ export class Vrm {
             ...options
         });
         return response.body!!.pipeThrough(new TextDecoderStream());
+    }
+
+    /**
+     * Speaks using pre-generated audio with a timeline of expression keyframes.
+     * This allows any TTS engine to be used — the engine receives WAV audio and
+     * frame-synchronized lip-sync data.
+     *
+     * @param audio - WAV audio data as ArrayBuffer or Uint8Array.
+     * @param keyframes - Timeline keyframes specifying expression targets and durations.
+     * @param options - Optional settings (e.g. waitForCompletion).
+     *
+     * @example
+     * ```typescript
+     * const vrm = await Vrm.findByName("MyAvatar");
+     * const wavData = await fetchWavFromTTS("Hello world");
+     * await vrm.speakWithTimeline(wavData, [
+     *   { duration: 0.1, targets: { aa: 1.0 } },
+     *   { duration: 0.05 },
+     *   { duration: 0.12, targets: { oh: 1.0, happy: 0.5 } },
+     * ]);
+     * ```
+     */
+    async speakWithTimeline(
+        audio: ArrayBuffer | Uint8Array,
+        keyframes: TimelineKeyframe[],
+        options?: SpeakTimelineOptions,
+    ): Promise<void> {
+        const bytes = audio instanceof Uint8Array ? audio : new Uint8Array(audio);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        const base64Audio = btoa(binary);
+        await this.post("speech/timeline", {
+            audio: base64Audio,
+            keyframes,
+            ...options,
+        });
     }
 
     /**
