@@ -335,7 +335,7 @@ export interface ShadowPanelPutBody {
 // --- Webview types ---
 
 /**
- * Webview source specification (request): URL/path or inline HTML.
+ * Webview source specification (request): URL/path, inline HTML, or local asset ID.
  *
  * @example
  * ```typescript
@@ -343,11 +343,14 @@ export interface ShadowPanelPutBody {
  * const urlSource: WebviewSource = { type: "url", url: "my-mod::ui.html" };
  * // Inline HTML content
  * const htmlSource: WebviewSource = { type: "html", content: "<h1>Hello</h1>" };
+ * // Local asset by ID
+ * const localSource: WebviewSource = { type: "local", id: "my-mod::panel.html" };
  * ```
  */
 export type WebviewSource =
     | { type: "url"; url: string }
-    | { type: "html"; content: string };
+    | { type: "html"; content: string }
+    | { type: "local"; id: string };
 
 /**
  * Webview source information (response).
@@ -356,7 +359,8 @@ export type WebviewSource =
  */
 export type WebviewSourceInfo =
     | { type: "url"; url: string }
-    | { type: "html"; content?: string };
+    | { type: "html"; content?: string }
+    | { type: "local"; id: string };
 
 /** Information about a webview instance. */
 export interface WebviewInfo {
@@ -368,13 +372,25 @@ export interface WebviewInfo {
     linkedVrm?: number | null;
 }
 
-/** Options for opening a webview. */
+/**
+ * Options for opening a webview.
+ *
+ * @example
+ * ```typescript
+ * const options: WebviewOpenOptions = {
+ *   source: { type: "url", url: "my-mod::ui.html" },
+ *   size: { x: 0.7, y: 0.7 },
+ *   viewportSize: { x: 800, y: 600 },
+ *   offset: { x: 0, y: 0.5 },
+ * };
+ * ```
+ */
 export interface WebviewOpenOptions {
     source: WebviewSource;
-    transform: TransformArgs;
-    parent?: number;
+    size?: Vec2;
+    viewportSize?: Vec2;
+    offset?: Vec2;
     linkedVrm?: number;
-    viewportSize?: [number, number];
 }
 
 /** Request body for patching webview properties. */

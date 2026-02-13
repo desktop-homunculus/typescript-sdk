@@ -18,10 +18,9 @@ import {Vrm} from "./vrm";
  * ```typescript
  * const webview = await Webview.open({
  *   source: { type: "url", url: "my-mod::ui.html" },
- *   transform: {
- *     translation: { x: 0, y: 1.5, z: 0 },
- *   },
- *   viewportSize: [800, 600]
+ *   size: { x: 0.7, y: 0.7 },
+ *   viewportSize: { x: 800, y: 600 },
+ *   offset: { x: 0, y: 0.5 },
  * });
  *
  * if (!(await webview.isClosed())) {
@@ -104,7 +103,7 @@ export class Webview {
     /**
      * Navigates the webview to a new source.
      *
-     * @param source - The new source (URL/path or inline HTML)
+     * @param source - The new source (URL/path, inline HTML, or local asset ID)
      *
      * @example
      * ```typescript
@@ -113,6 +112,8 @@ export class Webview {
      * await wv.navigate({ type: "url", url: "my-mod::page.html" });
      * // Navigate to inline HTML
      * await wv.navigate({ type: "html", content: "<h1>Hello</h1>" });
+     * // Navigate to a local asset by ID
+     * await wv.navigate({ type: "local", id: "my-mod::panel.html" });
      * ```
      */
     async navigate(source: WebviewSource): Promise<void> {
@@ -207,18 +208,20 @@ export class Webview {
      * // Open with a mod asset URL
      * const panel = await Webview.open({
      *   source: { type: "url", url: "my-mod::settings.html" },
-     *   transform: {
-     *     translation: { x: 0, y: 2, z: -1 },
-     *   },
-     *   viewportSize: [800, 600]
+     *   size: { x: 0.7, y: 0.5 },
+     *   viewportSize: { x: 800, y: 600 },
+     *   offset: { x: 0, y: 1.0 },
      * });
      *
      * // Open with inline HTML
      * const inline = await Webview.open({
      *   source: { type: "html", content: "<h1>Hello World</h1>" },
-     *   transform: {
-     *     translation: { x: 0, y: 1, z: 0 },
-     *   },
+     * });
+     *
+     * // Open with a local asset
+     * const local = await Webview.open({
+     *   source: { type: "local", id: "my-mod::panel.html" },
+     *   offset: { x: 0.5, y: 0 },
      * });
      * ```
      */
