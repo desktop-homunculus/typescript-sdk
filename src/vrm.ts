@@ -414,7 +414,7 @@ export class Vrm {
      *
      * // After (using VoiceVox MOD command):
      * import { mods } from "@homunculus/api";
-     * await mods.executeCommand("voicevox", {
+     * await mods.executeCommand({
      *   command: "speak",
      *   stdin: JSON.stringify({ entity: vrm.entity, text: "こんにちは" }),
      *   timeoutMs: 60000,
