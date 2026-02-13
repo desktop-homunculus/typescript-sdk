@@ -1,5 +1,4 @@
 import {host} from "./host";
-import {SubtitleOptions} from "./math";
 
 /**
  * Shadow Panel API namespace for controlling the application's shadow overlay.
@@ -29,21 +28,15 @@ export namespace shadowPanel {
      * Sets the transparency level of the shadow panel.
      *
      * @param alpha - The transparency value between 0 (invisible) and 1 (opaque)
-     * @param options - Optional speaker and subtitle settings
      *
      * @example
      * ```typescript
      * await shadowPanel.setAlpha(0.7);
-     * await shadowPanel.setAlpha(0.5, { speaker: 1 });
      * ```
      */
-    export const setAlpha = async (
-        alpha: number,
-        options?: { speaker?: number; subtitle?: SubtitleOptions }
-    ): Promise<void> => {
+    export const setAlpha = async (alpha: number): Promise<void> => {
         await host.put(host.createUrl("shadow-panel/alpha"), {
             alpha,
-            ...options,
         });
     }
 }

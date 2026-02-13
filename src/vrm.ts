@@ -1,8 +1,6 @@
 import {
     TransformArgs,
     GlobalViewport,
-    SubtitleOptions,
-    VoiceVoxRequest,
     ExpressionsResponse,
     ExpressionWeightResponse,
     SpringBoneChainsResponse,
@@ -48,25 +46,6 @@ export interface SpeakTimelineOptions {
      * Defaults to true.
      */
     waitForCompletion?: boolean;
-}
-
-export interface SpeakOnVoiceVoxOptions {
-    /**
-     * The voice vox speaker ID.
-     */
-    speaker?: number;
-    /**
-     * The pause duration in seconds between sentences.
-     */
-    pause?: number;
-    /**
-     * If true, the method will wait for the speech to complete.
-     */
-    waitForCompletion?: boolean;
-    /**
-     * Subtitle display options.
-     */
-    subtitle?: SubtitleOptions;
 }
 
 export interface VrmPointerEvent {
@@ -399,34 +378,6 @@ export class Vrm {
      */
     async setVrmaSpeed(asset: string, speed: number): Promise<void> {
         await host.put(host.createUrl(`vrm/${this.entity}/vrma/speed`), {asset, speed});
-    }
-
-    /**
-     * Speaks the given text using VoiceVox.
-     *
-     * @deprecated Use the VoiceVox MOD command instead.
-     * Install the `voicevox` MOD and execute the `speak` command:
-     *
-     * @example Migration:
-     * ```typescript
-     * // Before (deprecated):
-     * await vrm.speakOnVoiceVox("こんにちは");
-     *
-     * // After (using VoiceVox MOD command):
-     * import { mods } from "@homunculus/api";
-     * await mods.executeCommand({
-     *   command: "speak",
-     *   stdin: JSON.stringify({ entity: vrm.entity, text: "こんにちは" }),
-     *   timeoutMs: 60000,
-     * });
-     * ```
-     */
-    async speakOnVoiceVox(sentences: string[] | string, options?: SpeakOnVoiceVoxOptions) {
-        const response = await this.post("speech/voicevox", {
-            sentences: (typeof sentences === "string") ? [sentences] : sentences,
-            ...options
-        });
-        return response.body!!.pipeThrough(new TextDecoderStream());
     }
 
     /**

@@ -172,25 +172,6 @@ export interface VrmStateRequest {
     state: string;
 }
 
-/** Options for subtitle display during speech. */
-export interface SubtitleOptions {
-    /** The mod asset ID of the font to use for the subtitle text. */
-    font?: string;
-    /** The font size of the subtitle text. */
-    fontSize?: number;
-    /** The color of the subtitle text [r, g, b, a] in 0-1 range. */
-    color?: [number, number, number, number];
-}
-
-/** Request body for VoiceVox speech synthesis. */
-export interface VoiceVoxRequest {
-    sentences: string[];
-    speaker?: number;
-    pause?: number;
-    waitForCompletion?: boolean;
-    subtitle?: SubtitleOptions;
-}
-
 /** Response for VRM expression queries. */
 export interface ExpressionsResponse {
     available: string[];
@@ -328,8 +309,6 @@ export interface StampRequestBody {
 /** Request body for setting shadow panel alpha. */
 export interface ShadowPanelPutBody {
     alpha: number;
-    speaker?: number;
-    subtitle?: SubtitleOptions;
 }
 
 // --- Webview types ---
