@@ -176,12 +176,12 @@ export namespace mods {
         stderr: string;
     }
 
-    /** Wire format for NDJSON events from the server (snake_case). */
+    /** Wire format for NDJSON events from the server. */
     interface RawCommandEvent {
         type: "stdout" | "stderr" | "exit";
         data?: string;
         code?: number | null;
-        timed_out?: boolean;
+        timedOut?: boolean;
         signal?: string;
     }
 
@@ -190,7 +190,7 @@ export namespace mods {
             command: request.command,
             args: request.args,
             stdin: request.stdin,
-            timeout_ms: request.timeoutMs,
+            timeoutMs: request.timeoutMs,
         };
     }
 
@@ -204,7 +204,7 @@ export namespace mods {
                 return {
                     type: "exit",
                     exitCode: raw.code ?? null,
-                    timedOut: raw.timed_out ?? false,
+                    timedOut: raw.timedOut ?? false,
                     signal: raw.signal,
                 };
         }
