@@ -8,11 +8,11 @@
  * @example
  * ```typescript
  * // Execute a command and collect the result
- * const result = await mods.executeCommand("my-mod", { command: "greet" });
+ * const result = await mods.executeCommand({ command: "greet" });
  * console.log(result.stdout);
  *
  * // Stream command output in real-time
- * for await (const event of mods.streamCommand("my-mod", { command: "build" })) {
+ * for await (const event of mods.streamCommand({ command: "build" })) {
  *   if (event.type === "stdout") console.log(event.data);
  *   if (event.type === "stderr") console.error(event.data);
  *   if (event.type === "exit") console.log("Exit code:", event.exitCode);
@@ -114,7 +114,7 @@ export namespace mods {
      * ```
      */
     export interface ExecuteCommandRequest {
-        /** The command name to execute (as defined in the mod's package.json bin field). */
+        /** The command name to execute (resolved via npx from installed mod packages). */
         command: string;
         /** Arguments to pass to the script (after the script path). Max 64 args, each max 4096 chars. */
         args?: string[];
@@ -155,7 +155,7 @@ export namespace mods {
      *
      * @example
      * ```typescript
-     * const result = await mods.executeCommand("my-mod", { command: "hello" });
+     * const result = await mods.executeCommand({ command: "hello" });
      * if (result.exitCode === 0) {
      *   console.log("Output:", result.stdout);
      * } else {
@@ -216,7 +216,6 @@ export namespace mods {
      * Returns an async generator that yields {@link CommandEvent} objects
      * as the command produces output. The last event is always an `exit` event.
      *
-     * @param modName - The name of the mod
      * @param request - Command execution parameters
      * @param signal - Optional AbortSignal for cancellation
      * @returns An async generator yielding command events
@@ -224,7 +223,7 @@ export namespace mods {
      * @example
      * ```typescript
      * // Stream output from a long-running build
-     * for await (const event of mods.streamCommand("my-mod", { command: "build" })) {
+     * for await (const event of mods.streamCommand({ command: "build" })) {
      *   switch (event.type) {
      *     case "stdout": console.log(event.data); break;
      *     case "stderr": console.error(event.data); break;
@@ -234,12 +233,11 @@ export namespace mods {
      * ```
      */
     export async function* streamCommand(
-        modName: string,
         request: ExecuteCommandRequest,
         signal?: AbortSignal,
     ): AsyncGenerator<CommandEvent> {
         const stream = host.postStream<RawCommandEvent>(
-            host.createUrl(`mods/${modName}/commands/execute`),
+            host.createUrl("commands/execute"),
             toRequestBody(request),
             signal,
         );
@@ -254,7 +252,6 @@ export namespace mods {
      * This is a convenience wrapper around {@link streamCommand} that buffers
      * all output and returns a single {@link CommandResult}.
      *
-     * @param modName - The name of the mod
      * @param request - Command execution parameters
      * @param signal - Optional AbortSignal for cancellation
      * @returns The collected command result with exit code, stdout, and stderr
@@ -262,16 +259,16 @@ export namespace mods {
      * @example
      * ```typescript
      * // Simple execution
-     * const result = await mods.executeCommand("my-mod", { command: "build" });
+     * const result = await mods.executeCommand({ command: "build" });
      *
      * // With arguments
-     * const result = await mods.executeCommand("my-mod", {
+     * const result = await mods.executeCommand({
      *   command: "compile",
      *   args: ["--target", "es2020"],
      * });
      *
      * // With stdin data and custom timeout
-     * const result = await mods.executeCommand("my-mod", {
+     * const result = await mods.executeCommand({
      *   command: "transform",
      *   stdin: JSON.stringify({ input: "data" }),
      *   timeoutMs: 60000,
@@ -279,7 +276,6 @@ export namespace mods {
      * ```
      */
     export async function executeCommand(
-        modName: string,
         request: ExecuteCommandRequest,
         signal?: AbortSignal,
     ): Promise<CommandResult> {
@@ -289,7 +285,7 @@ export namespace mods {
         let timedOut = false;
         let exitSignal: string | undefined;
 
-        for await (const event of streamCommand(modName, request, signal)) {
+        for await (const event of streamCommand(request, signal)) {
             switch (event.type) {
                 case "stdout":
                     stdoutLines.push(event.data);
@@ -311,73 +307,6 @@ export namespace mods {
             signal: exitSignal,
             stdout: stdoutLines.join("\n"),
             stderr: stderrLines.join("\n"),
-        };
-    }
-
-    // ---- Legacy API ----
-
-    /**
-     * Options for executing a mod bin command.
-     *
-     * @deprecated Use {@link ExecuteCommandRequest} instead.
-     */
-    export interface BinCommandRequest {
-        /** Arguments to pass to the script (after the script path). */
-        args?: string[];
-        /** Data to write to the process stdin. Stdin is closed after writing. */
-        stdin?: string;
-        /** Timeout in milliseconds. Defaults to 30000 (30s). */
-        timeout_ms?: number;
-    }
-
-    /**
-     * Response from a mod bin command execution.
-     *
-     * @deprecated Use {@link CommandResult} instead.
-     */
-    export interface BinCommandResponse {
-        /** Exit code of the command process. */
-        exit_code: number;
-        /** Standard output from the command. */
-        stdout: string;
-        /** Standard error from the command. */
-        stderr: string;
-    }
-
-    /**
-     * Execute a bin command defined in a mod's package.json.
-     *
-     * @deprecated Use {@link executeCommand} instead. This function calls the new
-     * streaming API internally and maps the result to the legacy response format.
-     * Note: when the process is killed by a signal (exitCode === null), exit_code
-     * will be -1 as the legacy format cannot represent null exit codes.
-     *
-     * @param modName - The name of the mod
-     * @param command - The bin command name
-     * @param options - Optional execution parameters
-     * @returns The command execution result in legacy format
-     *
-     * @example
-     * ```typescript
-     * // Prefer executeCommand() instead:
-     * const result = await mods.executeCommand("my-mod", { command: "build" });
-     * ```
-     */
-    export async function executeBinCommand(
-        modName: string,
-        command: string,
-        options?: BinCommandRequest,
-    ): Promise<BinCommandResponse> {
-        const result = await executeCommand(modName, {
-            command,
-            args: options?.args,
-            stdin: options?.stdin,
-            timeoutMs: options?.timeout_ms,
-        });
-        return {
-            exit_code: result.exitCode ?? -1,
-            stdout: result.stdout,
-            stderr: result.stderr,
         };
     }
 }
