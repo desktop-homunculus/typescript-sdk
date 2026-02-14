@@ -33,4 +33,72 @@ export namespace app {
             return false;
         }
     }
+
+    /**
+     * Platform information about the running system.
+     */
+    export interface PlatformInfo {
+        /** Operating system name (e.g., "macos", "windows", "linux"). */
+        os: string;
+        /** CPU architecture (e.g., "aarch64", "x86_64"). */
+        arch: string;
+    }
+
+    /**
+     * Summary of a loaded mod as returned by the info endpoint.
+     */
+    export interface InfoMod {
+        /** The mod package name. */
+        name: string;
+        /** The mod package version. */
+        version: string;
+        /** Human-readable description. */
+        description: string | null;
+        /** The mod author. */
+        author: string | null;
+        /** The mod license. */
+        license: string | null;
+        /** Whether the mod has a running main process. */
+        has_main: boolean;
+        /** Available bin command names. */
+        bin_commands: string[];
+        /** Registered asset IDs. */
+        asset_ids: string[];
+    }
+
+    /**
+     * Application metadata returned by the info endpoint.
+     */
+    export interface AppInfo {
+        /** The engine version string (e.g., "0.1.0-alpha.3.2"). */
+        version: string;
+        /** Platform information. */
+        platform: PlatformInfo;
+        /** Engine-level features available in this build. */
+        features: string[];
+        /** All loaded mods with metadata. */
+        mods: InfoMod[];
+    }
+
+    /**
+     * Returns metadata about the running Desktop Homunculus instance.
+     *
+     * Provides the engine version, platform info, compiled features,
+     * and loaded mods in a single request. Useful for startup checks,
+     * feature detection, and status displays.
+     *
+     * @returns Application info including version, platform, features, and mods
+     *
+     * @example
+     * ```typescript
+     * const info = await app.info();
+     * console.log(`Engine v${info.version} on ${info.platform.os}/${info.platform.arch}`);
+     * console.log(`Features: ${info.features.join(", ")}`);
+     * console.log(`${info.mods.length} mods loaded`);
+     * ```
+     */
+    export const info = async (): Promise<AppInfo> => {
+        const response = await host.get(host.createUrl("info"));
+        return await response.json() as AppInfo;
+    };
 }
