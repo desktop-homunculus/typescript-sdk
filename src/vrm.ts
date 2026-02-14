@@ -44,6 +44,11 @@ export interface SpeakTimelineOptions {
      * Defaults to true.
      */
     waitForCompletion?: boolean;
+    /**
+     * Duration in seconds for smoothstep blending between adjacent keyframes.
+     * Defaults to 0.05 (50ms). Clamped to 40% of each keyframe's duration.
+     */
+    transitionDuration?: number;
 }
 
 export interface VrmPointerEvent {
