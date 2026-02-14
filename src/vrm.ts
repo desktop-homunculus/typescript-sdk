@@ -1,7 +1,6 @@
 import {
     TransformArgs,
     ExpressionsResponse,
-    ExpressionWeightResponse,
     SpringBoneChainsResponse,
     SpringBoneChain,
     SpringBoneProps,
@@ -258,7 +257,17 @@ export class Vrm {
     }
 
     /**
-     * Gets all expressions and their current weights.
+     * Gets all expressions and their current weights, including metadata
+     * such as binary status and override settings.
+     *
+     * @example
+     * ```typescript
+     * const vrm = await Vrm.findByName("MyAvatar");
+     * const { expressions } = await vrm.expressions();
+     * for (const expr of expressions) {
+     *   console.log(`${expr.name}: ${expr.weight}`);
+     * }
+     * ```
      */
     async expressions(): Promise<ExpressionsResponse> {
         const response = await this.fetch("expressions");
@@ -266,34 +275,66 @@ export class Vrm {
     }
 
     /**
-     * Sets multiple expression weights at once.
+     * Sets expression weights, replacing all previous overrides.
+     * Expressions not included will return to VRMA animation control.
      *
-     * @param weights A record of expression names to weight values.
+     * @param weights A record of expression names to weight values (0.0-1.0).
+     *
+     * @example
+     * ```typescript
+     * const vrm = await Vrm.findByName("MyAvatar");
+     * await vrm.setExpressions({ happy: 1.0, blink: 0.5 });
+     * ```
      */
     async setExpressions(weights: Record<string, number>): Promise<void> {
-        await this.put("expressions", weights);
+        await this.put("expressions", {weights});
     }
 
     /**
-     * Gets the weight of a single expression.
+     * Modifies specific expression weights without affecting others (partial update).
+     * Existing overrides not mentioned remain unchanged.
      *
-     * @param name The expression name.
-     * @returns The expression weight value.
+     * @param weights A record of expression names to weight values (0.0-1.0).
+     *
+     * @example
+     * ```typescript
+     * const vrm = await Vrm.findByName("MyAvatar");
+     * // Only modifies "happy", leaves other overrides intact
+     * await vrm.modifyExpressions({ happy: 1.0 });
+     * ```
      */
-    async expression(name: string): Promise<number> {
-        const response = await host.get(host.createUrl(`vrm/${this.entity}/expressions/${name}`));
-        const json = await response.json() as ExpressionWeightResponse;
-        return json.weight;
+    async modifyExpressions(weights: Record<string, number>): Promise<void> {
+        await this.patch("expressions", {weights});
     }
 
     /**
-     * Sets the weight of a single expression.
+     * Clears all expression overrides, returning control to VRMA animation.
      *
-     * @param name The expression name.
-     * @param weight The weight value to set.
+     * @example
+     * ```typescript
+     * const vrm = await Vrm.findByName("MyAvatar");
+     * await vrm.clearExpressions();
+     * ```
      */
-    async setExpression(name: string, weight: number): Promise<void> {
-        await host.put(host.createUrl(`vrm/${this.entity}/expressions/${name}`), {weight});
+    async clearExpressions(): Promise<void> {
+        await this.delete("expressions");
+    }
+
+    /**
+     * Modifies mouth expression weights for lip-sync.
+     * Unspecified mouth expressions are reset to 0.0.
+     * Non-mouth expression overrides are preserved.
+     *
+     * @param weights A record of mouth expression names to weight values (0.0-1.0).
+     *
+     * @example
+     * ```typescript
+     * const vrm = await Vrm.findByName("MyAvatar");
+     * await vrm.modifyMouth({ aa: 0.8, oh: 0.2 });
+     * ```
+     */
+    async modifyMouth(weights: Record<string, number>): Promise<void> {
+        await this.patch("expressions/mouth", {weights});
     }
 
     /**
@@ -539,6 +580,10 @@ export class Vrm {
 
     private async put(path: string, body?: object) {
         await host.put(host.createUrl(`vrm/${this.entity}/${path}`), body);
+    }
+
+    private async patch(path: string, body?: object) {
+        await host.patch(host.createUrl(`vrm/${this.entity}/${path}`), body);
     }
 
     private async delete(path: string) {

@@ -172,15 +172,39 @@ export interface VrmStateRequest {
     state: string;
 }
 
-/** Response for VRM expression queries. */
-export interface ExpressionsResponse {
-    available: string[];
-    current: Record<string, number>;
+/** Override type for expression override settings. */
+export type OverrideType = "none" | "blend" | "block";
+
+/**
+ * Information about a single VRM expression.
+ *
+ * @example
+ * ```typescript
+ * const vrm = await Vrm.findByName("MyAvatar");
+ * const { expressions } = await vrm.expressions();
+ * for (const expr of expressions) {
+ *   console.log(`${expr.name}: weight=${expr.weight}, binary=${expr.isBinary}`);
+ * }
+ * ```
+ */
+export interface ExpressionInfo {
+    /** Expression name (e.g. "happy", "aa", "blink"). */
+    name: string;
+    /** Current weight value (0.0-1.0). */
+    weight: number;
+    /** Whether this expression is binary (snaps to 0 or 1). */
+    isBinary: boolean;
+    /** Override type for blink expressions. */
+    overrideBlink: OverrideType;
+    /** Override type for lookAt expressions. */
+    overrideLookAt: OverrideType;
+    /** Override type for mouth expressions. */
+    overrideMouth: OverrideType;
 }
 
-/** Response for a single expression weight query. */
-export interface ExpressionWeightResponse {
-    weight: number;
+/** Response for VRM expression queries. */
+export interface ExpressionsResponse {
+    expressions: ExpressionInfo[];
 }
 
 /** Arguments for moving a VRM to a viewport position. */
