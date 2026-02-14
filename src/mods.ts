@@ -21,6 +21,7 @@
  */
 
 import { host } from "./host";
+import type { WebviewOpenOptions } from "./math";
 
 export namespace mods {
     /**
@@ -308,5 +309,50 @@ export namespace mods {
             stdout: stdoutLines.join("\n"),
             stderr: stderrLines.join("\n"),
         };
+    }
+
+    /**
+     * Metadata for a mod-registered context menu item.
+     *
+     * @example
+     * ```typescript
+     * const items = await mods.menus();
+     * for (const item of items) {
+     *   console.log(`${item.modName}: ${item.text}`);
+     * }
+     * ```
+     */
+    export interface ModMenuMetadata {
+        /** Unique identifier for the menu item. */
+        id: string;
+        /** The mod package name that registered this menu item. */
+        modName: string;
+        /** Display text shown in the context menu. */
+        text: string;
+        /** Bin command to execute when the menu item is selected. */
+        command?: string;
+        /** Webview to open when the menu item is selected. */
+        webview?: WebviewOpenOptions;
+    }
+
+    /**
+     * Returns all registered mod menu items.
+     *
+     * Menu items are declared in each mod's `package.json` under the
+     * `homunculus.menus` field and collected at startup.
+     *
+     * @example
+     * ```typescript
+     * import { mods } from "@homunculus/api";
+     *
+     * const menuItems = await mods.menus();
+     * for (const item of menuItems) {
+     *   console.log(`${item.modName}: ${item.text}`);
+     * }
+     * ```
+     */
+    export async function menus(): Promise<ModMenuMetadata[]> {
+        const response = await host.get(host.createUrl("mods/menus"));
+        return await response.json();
     }
 }
