@@ -172,4 +172,42 @@ export namespace entities {
         }));
         return await response.json();
     }
+
+    /**
+     * Target position for entity movement.
+     *
+     * Use `type: "world"` for direct world-space coordinates (x, y required, z optional).
+     * Use `type: "viewport"` for screen-space coordinates that are automatically converted to world space.
+     */
+    export type MoveTarget =
+        | { type: "world"; x: number; y: number; z?: number }
+        | { type: "viewport"; x: number; y: number };
+
+    /**
+     * Moves an entity to the specified position.
+     *
+     * Supports two coordinate types:
+     * - **World coordinates**: Sets the entity's position directly in 3D world space.
+     *   `z` is optional — if omitted, the entity keeps its current z position.
+     * - **Viewport coordinates**: Screen-space position that is automatically converted
+     *   to world coordinates internally.
+     *
+     * @param entity - The entity ID to move
+     * @param target - The target position (world or viewport coordinates)
+     *
+     * @example
+     * ```typescript
+     * // Move to world coordinates
+     * await entities.move(vrmEntity, { type: "world", x: 0, y: 1.5, z: -2 });
+     *
+     * // Move to world coordinates (keep current z)
+     * await entities.move(vrmEntity, { type: "world", x: 0, y: 1.5 });
+     *
+     * // Move to a screen position
+     * await entities.move(vrmEntity, { type: "viewport", x: 500, y: 300 });
+     * ```
+     */
+    export const move = async (entity: number, target: MoveTarget): Promise<void> => {
+        await host.post(host.createUrl(`entities/${entity}/move`), target);
+    }
 }

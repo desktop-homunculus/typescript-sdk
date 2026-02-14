@@ -1,6 +1,5 @@
 import {
     TransformArgs,
-    GlobalViewport,
     ExpressionsResponse,
     ExpressionWeightResponse,
     SpringBoneChainsResponse,
@@ -256,15 +255,6 @@ export class Vrm {
     async position(): Promise<PositionResponse> {
         const response = await this.fetch("position");
         return await response.json() as PositionResponse;
-    }
-
-    /**
-     * Moves the VRM to a global viewport position.
-     *
-     * @param globalViewport The target viewport position.
-     */
-    async moveTo(globalViewport: GlobalViewport): Promise<void> {
-        await this.post("move", {globalViewport});
     }
 
     /**
