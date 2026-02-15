@@ -1,4 +1,5 @@
 import {host} from "./host";
+import {EventSource} from 'eventsource'
 
 /**
  * Signals API namespace for cross-process communication.

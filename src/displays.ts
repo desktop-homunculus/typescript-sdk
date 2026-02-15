@@ -1,18 +1,18 @@
-import {DisplayInfo} from "./math";
+import {GlobalDisplay} from "./math";
 import {host} from "./host";
 
 /**
  * Displays API namespace for monitor and screen management.
  *
  * Provides functionality to query information about connected displays/monitors,
- * including their dimensions, positions, and scale factors.
+ * including their dimensions, positions, and frame rectangles.
  *
  * @example
  * ```typescript
  * const allDisplays = await displays.findAll();
  * console.log(`Found ${allDisplays.length} displays`);
- * allDisplays.forEach((display, index) => {
- *   console.log(`Display ${index + 1}: ${display.width}x${display.height} at (${display.x}, ${display.y})`);
+ * allDisplays.forEach((display) => {
+ *   console.log(`${display.title}: (${display.frame.min.x}, ${display.frame.min.y}) - (${display.frame.max.x}, ${display.frame.max.y})`);
  * });
  * ```
  */
@@ -28,8 +28,8 @@ export namespace displays {
      * console.log(`System has ${allDisplays.length} displays`);
      * ```
      */
-    export const findAll = async (): Promise<DisplayInfo[]> => {
+    export const findAll = async (): Promise<GlobalDisplay[]> => {
         const response = await host.get(host.createUrl("displays"));
-        return await response.json() as DisplayInfo[];
+        return await response.json() as GlobalDisplay[];
     }
 }

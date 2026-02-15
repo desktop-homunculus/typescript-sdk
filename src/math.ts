@@ -94,13 +94,20 @@ export interface TransformArgs {
     scale?: Vec3;
 }
 
-/** Display information returned from the displays endpoint. */
-export interface DisplayInfo {
-    width: number;
-    height: number;
-    x: number;
-    y: number;
-    scale_factor: number;
+/** A 2D rectangle defined by minimum and maximum points. */
+export interface Rect {
+    min: Vec2;
+    max: Vec2;
+}
+
+/** Information about a connected display/monitor. */
+export interface GlobalDisplay {
+    /** Unique display identifier. */
+    id: number;
+    /** Human-readable display name. */
+    title: string;
+    /** Display frame rectangle in screen coordinates. */
+    frame: Rect;
 }
 
 /** Global viewport coordinates (screen-space position). */
