@@ -210,4 +210,71 @@ export namespace entities {
     export const move = async (entity: number, target: MoveTarget): Promise<void> => {
         await host.post(host.createUrl(`entities/${entity}/move`), target);
     }
+
+    /**
+     * Easing functions for tween animations.
+     * Controls the acceleration curve of the animation.
+     */
+    export type EasingFunction =
+        | "linear"
+        | "quadraticIn" | "quadraticOut" | "quadraticInOut"
+        | "cubicIn" | "cubicOut" | "cubicInOut"
+        | "quarticIn" | "quarticOut" | "quarticInOut"
+        | "quinticIn" | "quinticOut" | "quinticInOut"
+        | "sineIn" | "sineOut" | "sineInOut"
+        | "circularIn" | "circularOut" | "circularInOut"
+        | "exponentialIn" | "exponentialOut" | "exponentialInOut"
+        | "elasticIn" | "elasticOut" | "elasticInOut"
+        | "backIn" | "backOut" | "backInOut"
+        | "bounceIn" | "bounceOut" | "bounceInOut"
+        | "smoothStepIn" | "smoothStepOut" | "smoothStepInOut"
+        | "smootherStepIn" | "smootherStepOut" | "smootherStepInOut";
+
+    /**
+     * Request parameters for tweening an entity's position.
+     */
+    export interface TweenPositionRequest {
+        /** The entity ID to tween */
+        entityId: bigint;
+        /** Target position as [x, y, z] */
+        target: [number, number, number];
+        /** Duration in milliseconds */
+        durationMs: number;
+        /** Easing function (default: "linear") */
+        easing?: EasingFunction;
+        /** Whether to wait for the tween to complete before returning (default: false) */
+        wait?: boolean;
+    }
+
+    /**
+     * Request parameters for tweening an entity's rotation.
+     */
+    export interface TweenRotationRequest {
+        /** The entity ID to tween */
+        entityId: bigint;
+        /** Target rotation as quaternion [x, y, z, w] */
+        target: [number, number, number, number];
+        /** Duration in milliseconds */
+        durationMs: number;
+        /** Easing function (default: "linear") */
+        easing?: EasingFunction;
+        /** Whether to wait for the tween to complete before returning (default: false) */
+        wait?: boolean;
+    }
+
+    /**
+     * Request parameters for tweening an entity's scale.
+     */
+    export interface TweenScaleRequest {
+        /** The entity ID to tween */
+        entityId: bigint;
+        /** Target scale as [x, y, z] */
+        target: [number, number, number];
+        /** Duration in milliseconds */
+        durationMs: number;
+        /** Easing function (default: "linear") */
+        easing?: EasingFunction;
+        /** Whether to wait for the tween to complete before returning (default: false) */
+        wait?: boolean;
+    }
 }
