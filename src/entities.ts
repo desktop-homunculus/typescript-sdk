@@ -227,8 +227,8 @@ export namespace entities {
         | "elasticIn" | "elasticOut" | "elasticInOut"
         | "backIn" | "backOut" | "backInOut"
         | "bounceIn" | "bounceOut" | "bounceInOut"
-        | "smoothStepIn" | "smoothStepOut" | "smoothStepInOut"
-        | "smootherStepIn" | "smootherStepOut" | "smootherStepInOut";
+        | "smoothStepIn" | "smoothStepOut" | "smoothStep"
+        | "smootherStepIn" | "smootherStepOut" | "smootherStep";
 
     /**
      * Request parameters for tweening an entity's position.
