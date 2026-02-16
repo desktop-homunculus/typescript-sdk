@@ -277,4 +277,66 @@ export namespace entities {
         /** Whether to wait for the tween to complete before returning (default: false) */
         wait?: boolean;
     }
+
+    /**
+     * Smoothly animate an entity's position to a target value.
+     *
+     * @param request - Tween parameters
+     * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
+     *
+     * @example
+     * ```typescript
+     * await entities.tweenPosition({
+     *   entityId: myEntity,
+     *   target: [100, 50, 0],
+     *   durationMs: 1000,
+     *   easing: "quadraticInOut",
+     *   wait: true,
+     * });
+     * ```
+     */
+    export async function tweenPosition(request: TweenPositionRequest): Promise<void> {
+        await host.post(host.createUrl("/entities/tween/position"), request);
+    }
+
+    /**
+     * Smoothly animate an entity's rotation to a target value.
+     *
+     * @param request - Tween parameters
+     * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
+     *
+     * @example
+     * ```typescript
+     * await entities.tweenRotation({
+     *   entityId: myEntity,
+     *   target: [0, 0, 0.7071, 0.7071], // 90 degrees around Z axis
+     *   durationMs: 500,
+     *   easing: "elasticOut",
+     * });
+     * ```
+     */
+    export async function tweenRotation(request: TweenRotationRequest): Promise<void> {
+        await host.post(host.createUrl("/entities/tween/rotation"), request);
+    }
+
+    /**
+     * Smoothly animate an entity's scale to a target value.
+     *
+     * @param request - Tween parameters
+     * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
+     *
+     * @example
+     * ```typescript
+     * await entities.tweenScale({
+     *   entityId: myEntity,
+     *   target: [2, 2, 2],
+     *   durationMs: 800,
+     *   easing: "bounceOut",
+     *   wait: false,
+     * });
+     * ```
+     */
+    export async function tweenScale(request: TweenScaleRequest): Promise<void> {
+        await host.post(host.createUrl("/entities/tween/scale"), request);
+    }
 }
