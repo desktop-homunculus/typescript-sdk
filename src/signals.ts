@@ -34,6 +34,45 @@ import {EventSource} from 'eventsource'
  */
 export namespace signals {
     /**
+     * Information about an active signal channel.
+     */
+    export interface SignalChannelInfo {
+        /** The signal channel name. */
+        signal: string;
+        /** The number of active subscribers. */
+        subscribers: number;
+    }
+
+    /**
+     * Lists all active signal channels and their subscriber counts.
+     *
+     * Returns information about every signal channel that has been created.
+     * Useful for debugging, monitoring, and discovering available channels.
+     *
+     * @returns Array of active signal channel information
+     *
+     * @example
+     * ```typescript
+     * // List all active signal channels
+     * const channels = await signals.list();
+     * for (const ch of channels) {
+     *   console.log(`${ch.signal}: ${ch.subscribers} subscribers`);
+     * }
+     *
+     * // Check if a specific signal has listeners before sending
+     * const channels = await signals.list();
+     * const target = channels.find(ch => ch.signal === "my-signal");
+     * if (target && target.subscribers > 0) {
+     *   await signals.send("my-signal", { data: "hello" });
+     * }
+     * ```
+     */
+    export const list = async (): Promise<SignalChannelInfo[]> => {
+        const response = await host.get(host.createUrl("signals"));
+        return await response.json() as SignalChannelInfo[];
+    }
+
+    /**
      * Creates a persistent connection to stream signal events of a specific type.
      *
      * This establishes a Server-Sent Events (SSE) connection that will receive
