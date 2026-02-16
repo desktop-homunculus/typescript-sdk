@@ -295,9 +295,9 @@ export namespace entities {
      * });
      * ```
      */
-    export async function tweenPosition(request: TweenPositionRequest): Promise<void> {
-        await host.post(host.createUrl("/entities/tween/position"), request);
-    }
+    export const tweenPosition = async (request: TweenPositionRequest): Promise<void> => {
+        await host.post(host.createUrl("entities/tween/position"), request);
+    };
 
     /**
      * Smoothly animate an entity's rotation to a target value.
@@ -315,9 +315,9 @@ export namespace entities {
      * });
      * ```
      */
-    export async function tweenRotation(request: TweenRotationRequest): Promise<void> {
-        await host.post(host.createUrl("/entities/tween/rotation"), request);
-    }
+    export const tweenRotation = async (request: TweenRotationRequest): Promise<void> => {
+        await host.post(host.createUrl("entities/tween/rotation"), request);
+    };
 
     /**
      * Smoothly animate an entity's scale to a target value.
@@ -336,7 +336,7 @@ export namespace entities {
      * });
      * ```
      */
-    export async function tweenScale(request: TweenScaleRequest): Promise<void> {
-        await host.post(host.createUrl("/entities/tween/scale"), request);
-    }
+    export const tweenScale = async (request: TweenScaleRequest): Promise<void> => {
+        await host.post(host.createUrl("entities/tween/scale"), request);
+    };
 }
