@@ -5,7 +5,7 @@ import {host} from "./host";
  *
  * Provides access to the asset registry, which contains all assets declared
  * by installed mods. Assets are referenced by their globally unique ID using
- * the format `"mod-name::asset/path.ext"`.
+ * the format `"mod-name:asset-name"` (e.g., `"elmer:idle"`, `"my-mod:click"`).
  *
  * @example
  * ```typescript

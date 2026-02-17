@@ -51,6 +51,6 @@ All source is in `src/`. Each file is a TypeScript namespace that maps to a doma
 
 ### Key Patterns
 - **Namespace-based API**: Each module exports a `namespace` (e.g., `export namespace vrm { ... }`). Consumers import namespaces directly.
-- **Asset references**: String format `"mod-name::asset/path.ext"` for VRM models, sounds, webview HTML, images.
+- **Asset references**: String format `"mod-name:asset-name"` (e.g., `"elmer:idle"`, `"my-mod:click"`) for VRM models, sounds, webview HTML, images.
 - **Options objects**: Configurable parameters use options/partial types (e.g., `SpawnVrmOptions`, `SpeakOnVoiceVoxOptions`).
 - **Comprehensive JSDoc**: All public APIs have `@example` blocks and `@packageDocumentation` tags. Maintain this style when adding new APIs.

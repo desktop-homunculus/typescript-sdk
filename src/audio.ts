@@ -100,10 +100,10 @@ export namespace audio {
      * @example
      * ```typescript
      * // Simple sound effect
-     * await audio.se.play("my-mod::sounds/notification.ogg");
+     * await audio.se.play("my-mod:notification");
      *
      * // With options
-     * await audio.se.play("my-mod::sounds/alert.ogg", {
+     * await audio.se.play("my-mod:alert", {
      *   volume: 0.5,
      *   speed: 1.2,
      *   panning: -0.5
@@ -162,10 +162,10 @@ export namespace audio {
          * @example
          * ```typescript
          * // Simple playback (loops by default)
-         * await audio.bgm.play("my-mod::music/battle.ogg");
+         * await audio.bgm.play("my-mod:battle");
          *
          * // With options
-         * await audio.bgm.play("my-mod::music/intro.ogg", {
+         * await audio.bgm.play("my-mod:intro", {
          *   loop: false,
          *   volume: 0.6,
          *   fadeIn: { durationSecs: 3.0, easing: "easeIn" }
