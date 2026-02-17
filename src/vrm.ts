@@ -545,7 +545,7 @@ export class Vrm {
         return await response.json() as VrmSnapshot[];
     }
 
-    static streamAllMetadata(
+    static streamMetadata(
         f: (vrm: VrmMetadata) => (void | Promise<void>)
     ): EventSource {
         const es = new EventSource(host.createUrl("vrm/stream"));
@@ -556,13 +556,13 @@ export class Vrm {
     }
 
     /**
-     * This method streams all currently existing VRM instances and any VRM instances that will be created in the future.
+     * Streams all currently existing VRM instances and any VRM instances that will be created in the future.
      * @param f
      */
-    static streamAll(
+    static stream(
         f: (vrm: Vrm) => (void | Promise<void>)
     ): EventSource {
-        return Vrm.streamAllMetadata(metadata => {
+        return Vrm.streamMetadata(metadata => {
             f(new Vrm(metadata.entity));
         });
     }
