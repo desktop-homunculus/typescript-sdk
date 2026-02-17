@@ -3,6 +3,14 @@ import {defineConfig} from 'rollup'
 import * as path from "node:path";
 import {fileURLToPath} from "node:url";
 import {dts} from "rollup-plugin-dts";
+import {rimrafSync} from 'rimraf';
+
+const cleanDistTypes = {
+    name: 'clean-dist-types',
+    closeBundle() {
+        rimrafSync('dist/types');
+    }
+};
 
 export default defineConfig([
     {
@@ -48,6 +56,6 @@ export default defineConfig([
     {
         input: 'dist/types/index.d.ts',
         output: {file: 'dist/index.d.ts', format: 'es'},
-        plugins: [dts()]
+        plugins: [dts(), cleanDistTypes]
     },
 ]);
