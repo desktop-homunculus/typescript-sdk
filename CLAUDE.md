@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TypeScript SDK (`@homunculus/sdk`) for building mods and extensions for Desktop Homunculus — a cross-platform desktop mascot application built with the Bevy game engine. The SDK communicates with the Bevy application via HTTP REST API on `localhost:3100`.
+TypeScript SDK (`homunculus-sdk`) for building mods and extensions for Desktop Homunculus — a cross-platform desktop mascot application built with the Bevy game engine. The SDK communicates with the Bevy application via HTTP REST API on `localhost:3100`.
 
 ## Commands
 
