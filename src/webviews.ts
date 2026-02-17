@@ -79,7 +79,7 @@ export class Webview {
      * @param offset - The new offset
      */
     async setOffset(offset: Vec2): Promise<void> {
-        await host.put(host.createUrl(`webviews/${this.entity}/offset`), offset);
+        await this.patch({ offset });
     }
 
     /**
@@ -88,7 +88,7 @@ export class Webview {
      * @param size - The new size
      */
     async setSize(size: Vec2): Promise<void> {
-        await host.put(host.createUrl(`webviews/${this.entity}/size`), size);
+        await this.patch({ size });
     }
 
     /**
@@ -97,7 +97,7 @@ export class Webview {
      * @param size - The new viewport size
      */
     async setViewportSize(size: Vec2): Promise<void> {
-        await host.put(host.createUrl(`webviews/${this.entity}/viewport-size`), size);
+        await this.patch({ viewportSize: size });
     }
 
     /**

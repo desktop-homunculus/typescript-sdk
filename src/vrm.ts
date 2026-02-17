@@ -242,7 +242,7 @@ export class Vrm {
      * Despawns this VRM entity.
      */
     async despawn(): Promise<void> {
-        await host.deleteMethod(host.createUrl(`vrm/${this.entity}/despawn`));
+        await host.deleteMethod(host.createUrl(`vrm/${this.entity}`));
     }
 
     /**

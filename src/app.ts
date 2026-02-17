@@ -27,7 +27,7 @@ export namespace app {
      */
     export const health = async (): Promise<boolean> => {
         try {
-            const response = await fetch(host.createUrl("health"));
+            const response = await fetch(host.createUrl("app/health"));
             return response.ok;
         } catch {
             return false;
@@ -59,11 +59,11 @@ export namespace app {
         /** The mod license. */
         license: string | null;
         /** Whether the mod has a running main process. */
-        has_main: boolean;
+        hasMain: boolean;
         /** Available bin command names. */
-        bin_commands: string[];
+        binCommands: string[];
         /** Registered asset IDs. */
-        asset_ids: string[];
+        assetIds: string[];
     }
 
     /**
@@ -98,7 +98,7 @@ export namespace app {
      * ```
      */
     export const info = async (): Promise<AppInfo> => {
-        const response = await host.get(host.createUrl("info"));
+        const response = await host.get(host.createUrl("app/info"));
         return await response.json() as AppInfo;
     };
 }

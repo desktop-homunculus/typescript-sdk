@@ -234,8 +234,6 @@ export namespace entities {
      * Request parameters for tweening an entity's position.
      */
     export interface TweenPositionRequest {
-        /** The entity ID to tween */
-        entityId: bigint;
         /** Target position as [x, y, z] */
         target: [number, number, number];
         /** Duration in milliseconds */
@@ -250,8 +248,6 @@ export namespace entities {
      * Request parameters for tweening an entity's rotation.
      */
     export interface TweenRotationRequest {
-        /** The entity ID to tween */
-        entityId: bigint;
         /** Target rotation as quaternion [x, y, z, w] */
         target: [number, number, number, number];
         /** Duration in milliseconds */
@@ -266,8 +262,6 @@ export namespace entities {
      * Request parameters for tweening an entity's scale.
      */
     export interface TweenScaleRequest {
-        /** The entity ID to tween */
-        entityId: bigint;
         /** Target scale as [x, y, z] */
         target: [number, number, number];
         /** Duration in milliseconds */
@@ -281,13 +275,13 @@ export namespace entities {
     /**
      * Smoothly animate an entity's position to a target value.
      *
+     * @param entityId - The entity ID to tween
      * @param request - Tween parameters
      * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
      *
      * @example
      * ```typescript
-     * await entities.tweenPosition({
-     *   entityId: myEntity,
+     * await entities.tweenPosition(myEntity, {
      *   target: [100, 50, 0],
      *   durationMs: 1000,
      *   easing: "quadraticInOut",
@@ -295,40 +289,40 @@ export namespace entities {
      * });
      * ```
      */
-    export const tweenPosition = async (request: TweenPositionRequest): Promise<void> => {
-        await host.post(host.createUrl("entities/tween/position"), request);
+    export const tweenPosition = async (entityId: bigint, request: TweenPositionRequest): Promise<void> => {
+        await host.post(host.createUrl(`entities/${entityId}/tween/position`), request);
     };
 
     /**
      * Smoothly animate an entity's rotation to a target value.
      *
+     * @param entityId - The entity ID to tween
      * @param request - Tween parameters
      * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
      *
      * @example
      * ```typescript
-     * await entities.tweenRotation({
-     *   entityId: myEntity,
+     * await entities.tweenRotation(myEntity, {
      *   target: [0, 0, 0.7071, 0.7071], // 90 degrees around Z axis
      *   durationMs: 500,
      *   easing: "elasticOut",
      * });
      * ```
      */
-    export const tweenRotation = async (request: TweenRotationRequest): Promise<void> => {
-        await host.post(host.createUrl("entities/tween/rotation"), request);
+    export const tweenRotation = async (entityId: bigint, request: TweenRotationRequest): Promise<void> => {
+        await host.post(host.createUrl(`entities/${entityId}/tween/rotation`), request);
     };
 
     /**
      * Smoothly animate an entity's scale to a target value.
      *
+     * @param entityId - The entity ID to tween
      * @param request - Tween parameters
      * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
      *
      * @example
      * ```typescript
-     * await entities.tweenScale({
-     *   entityId: myEntity,
+     * await entities.tweenScale(myEntity, {
      *   target: [2, 2, 2],
      *   durationMs: 800,
      *   easing: "bounceOut",
@@ -336,7 +330,7 @@ export namespace entities {
      * });
      * ```
      */
-    export const tweenScale = async (request: TweenScaleRequest): Promise<void> => {
-        await host.post(host.createUrl("entities/tween/scale"), request);
+    export const tweenScale = async (entityId: bigint, request: TweenScaleRequest): Promise<void> => {
+        await host.post(host.createUrl(`entities/${entityId}/tween/scale`), request);
     };
 }
