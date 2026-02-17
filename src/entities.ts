@@ -1,5 +1,5 @@
 import {host} from "./host";
-import {Transform} from "./math";
+import {type Transform} from "./math";
 
 /**
  * Entities API namespace for managing ECS (Entity Component System) entities.

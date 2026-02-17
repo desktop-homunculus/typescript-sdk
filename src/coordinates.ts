@@ -1,4 +1,4 @@
-import {Vec2, Vec3, GlobalViewport} from "./math";
+import {type Vec2, type Vec3, type GlobalViewport} from "./math";
 import {host} from "./host";
 
 /**

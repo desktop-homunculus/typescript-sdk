@@ -1,10 +1,10 @@
 import {host} from "./host";
 import {
-    WebviewOpenOptions,
-    WebviewInfo,
-    WebviewPatchRequest,
-    WebviewSource,
-    Vec2,
+    type WebviewOpenOptions,
+    type WebviewInfo,
+    type WebviewPatchRequest,
+    type WebviewSource,
+    type Vec2,
 } from "./math";
 import {Vrm} from "./vrm";
 
@@ -236,7 +236,7 @@ export class Webview {
      * @returns The current Webview instance, or undefined if not in a webview context
      */
     static current(): Webview | undefined {
-        //@ts-ignore
+        // @ts-expect-error -- CEF injects WEBVIEW_ENTITY on the window object
         const entity: number | undefined = window.WEBVIEW_ENTITY;
         return entity !== undefined ? new Webview(entity) : undefined;
     }

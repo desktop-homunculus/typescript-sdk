@@ -1,4 +1,4 @@
-import {GlobalDisplay} from "./math";
+import {type GlobalDisplay} from "./math";
 import {host} from "./host";
 
 /**

@@ -1,15 +1,15 @@
 import {
-    TransformArgs,
-    ExpressionsResponse,
-    SpringBoneChainsResponse,
-    SpringBoneChain,
-    SpringBoneProps,
-    VrmaPlayRequest,
-    VrmaState,
-    VrmaInfo,
-    VrmSnapshot,
-    Persona,
-    PositionResponse,
+    type TransformArgs,
+    type ExpressionsResponse,
+    type SpringBoneChainsResponse,
+    type SpringBoneChain,
+    type SpringBoneProps,
+    type VrmaPlayRequest,
+    type VrmaState,
+    type VrmaInfo,
+    type VrmSnapshot,
+    type Persona,
+    type PositionResponse,
 } from "./math";
 import {host} from "./host";
 import {EventSource} from "eventsource";

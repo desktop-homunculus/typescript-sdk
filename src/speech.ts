@@ -1,4 +1,4 @@
-import {TimelineKeyframe} from "./vrm";
+import {type TimelineKeyframe} from "./vrm";
 
 /**
  * Speech utilities for converting phoneme data to Timeline keyframes.
