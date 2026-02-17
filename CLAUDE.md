@@ -10,12 +10,12 @@ TypeScript SDK (`@homunculus/sdk`) for building mods and extensions for Desktop 
 
 ```bash
 npm install           # Install dependencies
-npm run build         # Production build (Rollup)
+npm run build         # Production build (tsc --noEmit type-check + Rollup bundle)
 npm run dev           # Watch mode build
-npm run check-types   # Type-check without emitting
+npm run lint          # ESLint
 ```
 
-No test framework is configured. No linter or formatter is configured.
+No test framework is configured.
 
 ## Build System
 

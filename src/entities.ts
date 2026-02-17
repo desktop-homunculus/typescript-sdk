@@ -289,7 +289,7 @@ export namespace entities {
      * });
      * ```
      */
-    export const tweenPosition = async (entityId: bigint, request: TweenPositionRequest): Promise<void> => {
+    export const tweenPosition = async (entityId: number, request: TweenPositionRequest): Promise<void> => {
         await host.post(host.createUrl(`entities/${entityId}/tween/position`), request);
     };
 
@@ -309,7 +309,7 @@ export namespace entities {
      * });
      * ```
      */
-    export const tweenRotation = async (entityId: bigint, request: TweenRotationRequest): Promise<void> => {
+    export const tweenRotation = async (entityId: number, request: TweenRotationRequest): Promise<void> => {
         await host.post(host.createUrl(`entities/${entityId}/tween/rotation`), request);
     };
 
@@ -330,7 +330,7 @@ export namespace entities {
      * });
      * ```
      */
-    export const tweenScale = async (entityId: bigint, request: TweenScaleRequest): Promise<void> => {
+    export const tweenScale = async (entityId: number, request: TweenScaleRequest): Promise<void> => {
         await host.post(host.createUrl(`entities/${entityId}/tween/scale`), request);
     };
 }

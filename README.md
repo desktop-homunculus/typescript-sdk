@@ -1,6 +1,6 @@
 # @homunculus/sdk
 
-TypeScript SDK for building mods and extensions for [Desktop Homunculus](https://github.com/not-elm/desktop_homunculus) — a cross-platform desktop mascot application built with the Bevy game engine.
+TypeScript SDK for building mods and extensions for [Desktop Homunculus](https://github.com/not-elm/desktop_homunculus).
 
 ## Install
 
