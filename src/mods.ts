@@ -343,7 +343,7 @@ export namespace mods {
      *
      * @example
      * ```typescript
-     * import { mods } from "homunculus-sdk";
+     * import { mods } from "hmcl-sdk";
      *
      * const menuItems = await mods.menus();
      * for (const item of menuItems) {

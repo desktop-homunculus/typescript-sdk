@@ -5,7 +5,7 @@ import {type TimelineKeyframe} from "./vrm";
  *
  * @example
  * ```typescript
- * import { speech, Vrm } from "homunculus-sdk";
+ * import { speech, Vrm } from "hmcl-sdk";
  *
  * const keyframes = speech.fromPhonemes([
  *   ["aa", 0.1],

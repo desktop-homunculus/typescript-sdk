@@ -1,5 +1,5 @@
 {
-  "name": "homunculus-sdk",
+  "name": "hmcl-sdk",
   "version": "1.0.0",
   "description": "TypeScript SDK for building mods and extensions for Desktop Homunculus",
   "author": "notelm",
