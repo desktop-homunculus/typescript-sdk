@@ -351,9 +351,9 @@ export class Vrm {
     }
 
     /**
-     * Gets a single spring bone chain by index.
+     * Gets a single spring bone chain by entity ID.
      *
-     * @param chainId The chain index.
+     * @param chainId The chain entity ID.
      */
     async springBone(chainId: number): Promise<SpringBoneChain> {
         const response = await host.get(host.createUrl(`vrm/${this.entity}/spring-bones/${chainId}`));
@@ -363,7 +363,7 @@ export class Vrm {
     /**
      * Updates spring bone properties for a chain.
      *
-     * @param chainId The chain index.
+     * @param chainId The chain entity ID.
      * @param props Partial properties to update.
      */
     async setSpringBone(chainId: number, props: Partial<SpringBoneProps>): Promise<void> {

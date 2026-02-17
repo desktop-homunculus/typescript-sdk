@@ -230,7 +230,7 @@ export interface SpringBoneProps {
 
 /** A single spring bone chain. */
 export interface SpringBoneChain {
-    index: number;
+    entity: number;
     joints: string[];
     props: SpringBoneProps;
 }
