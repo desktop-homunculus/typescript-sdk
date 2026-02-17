@@ -1,6 +1,6 @@
 # OpenAPI Alignment Design
 
-Align the TypeScript SDK (`@homunculus/api`) with the OpenAPI spec at `docs/api/open-api.yml`.
+Align the TypeScript SDK (`@homunculus/sdk`) with the OpenAPI spec at `docs/api/open-api.yml`.
 
 ## 1. Modules to Delete
 
@@ -40,9 +40,9 @@ Add `patch(url: URL, body?: any): Promise<Response>` method.
 ## 4. VRM Module (`vrm.ts`)
 
 ### Path changes
-| Old | New |
-|-----|-----|
-| `GET vrm/all` | `GET /vrm` |
+| Old                       | New               |
+| ------------------------- | ----------------- |
+| `GET vrm/all`             | `GET /vrm`        |
 | `GET vrm/all?stream=true` | `GET /vrm/stream` |
 
 ### Static method changes

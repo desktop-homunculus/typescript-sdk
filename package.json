@@ -1,5 +1,5 @@
 {
-  "name": "@homunculus/api",
+  "name": "@homunculus/sdk",
   "version": "1.0.0",
   "description": "The api for desktop_homunculus",
   "author": "notelm",
@@ -19,7 +19,6 @@
     "dev": "rollup -c --configPlugin typescript --watch",
     "build": "rollup -c --configPlugin typescript",
     "prepare": "npm run build",
-    "check-types": "tsc -b",
     "tsc": "rimraf dist && tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
