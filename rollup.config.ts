@@ -5,6 +5,24 @@ import {fileURLToPath} from "node:url";
 import {dts} from "rollup-plugin-dts";
 import {rimrafSync} from 'rimraf';
 
+const addJsExtension = {
+    name: 'add-js-extension',
+    generateBundle(_options, bundle) {
+        for (const file of Object.values(bundle)) {
+            if (file.type === 'chunk' && file.code) {
+                file.code = file.code.replace(
+                    /(from\s+['"])(\.\/[^'"]+?)(?<!\.js)(?<!\.cjs)(['"])/g,
+                    '$1$2.js$3'
+                );
+                file.code = file.code.replace(
+                    /(export\s+\*\s+from\s+['"])(\.\/[^'"]+?)(?<!\.js)(?<!\.cjs)(['"])/g,
+                    '$1$2.js$3'
+                );
+            }
+        }
+    }
+};
+
 const cleanDistTypes = {
     name: 'clean-dist-types',
     closeBundle() {
@@ -51,6 +69,7 @@ export default defineConfig([
                 target: "esnext",
                 module: "esnext",
             }),
+            addJsExtension,
         ],
     },
     {
