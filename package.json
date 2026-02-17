@@ -22,10 +22,8 @@
   "keywords": [],
   "scripts": {
     "dev": "rollup -c --configPlugin typescript --watch",
-    "build": "rollup -c --configPlugin typescript",
+    "build": "tsc --noEmit && rollup -c --configPlugin typescript",
     "prepare": "npm run build",
-    "check-types": "tsc --noEmit",
-    "tsc": "rimraf dist && tsc --watch",
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
