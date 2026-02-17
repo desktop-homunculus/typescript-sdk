@@ -6,25 +6,76 @@
  * and HTTP methods with automatic error handling.
  *
  * **Note:** This module is primarily for internal SDK use. Most developers should
- * use the higher-level namespaces like `gpt`, `vrm`, `commands`, etc.
+ * use the higher-level namespaces like `vrm`, `signals`, etc.
  *
  * @example
  * ```typescript
  * // Internal SDK usage (you typically won't need this directly)
- * const response = await host.get(host.createUrl("vrm/all"));
+ * const response = await host.get(host.createUrl("vrm"));
  * const vrms = await response.json();
  *
  * // URL construction with parameters
- * const url = host.createUrl("gpt/model", { vrm: 123 });
- * // Results in: http://localhost:3100/gpt/model?vrm=123
+ * const url = host.createUrl("vrm", { name: "MyCharacter" });
+ * // Results in: http://localhost:3100/vrm?name=MyCharacter
+ *
+ * // Configure the base URL (e.g., from an MCP server)
+ * host.configure({ baseUrl: "http://localhost:4000" });
  * ```
  */
-export namespace host {
-    /** The base URL for the Desktop Homunculus HTTP server */
-    export const base = "http://localhost:3100";
 
-    /** Creates a new URL instance pointing to the base server */
-    export const baseUrl = () => new URL("http://localhost:3100")
+/** Error thrown when the Homunculus HTTP API returns a non-OK response. */
+export class HomunculusApiError extends Error {
+    /** HTTP status code (e.g. 404, 500) */
+    readonly statusCode: number;
+    /** The request endpoint URL */
+    readonly endpoint: string;
+    /** The response body text */
+    readonly body: string;
+
+    constructor(statusCode: number, endpoint: string, body: string) {
+        super(`${endpoint}: ${statusCode} ${body}`);
+        this.name = "HomunculusApiError";
+        this.statusCode = statusCode;
+        this.endpoint = endpoint;
+        this.body = body;
+    }
+}
+
+/** Error thrown when an NDJSON stream contains malformed data. */
+export class HomunculusStreamError extends Error {
+    /** The raw line that failed to parse */
+    readonly rawLine: string;
+
+    constructor(rawLine: string, cause?: unknown) {
+        super(`Failed to parse NDJSON line: ${rawLine}`);
+        this.name = "HomunculusStreamError";
+        this.rawLine = rawLine;
+        if (cause) this.cause = cause;
+    }
+}
+
+export namespace host {
+    let _baseUrl = "http://localhost:3100";
+
+    /**
+     * Configures the SDK's base URL for the Desktop Homunculus HTTP server.
+     *
+     * @param options - Configuration options
+     *
+     * @example
+     * ```typescript
+     * host.configure({ baseUrl: "http://localhost:4000" });
+     * ```
+     */
+    export const configure = (options: { baseUrl: string }) => {
+        _baseUrl = options.baseUrl.replace(/\/+$/, "");
+    };
+
+    /** Returns the base URL for the Desktop Homunculus HTTP server. */
+    export const base = (): string => _baseUrl;
+
+    /** Creates a new URL instance pointing to the base server. */
+    export const baseUrl = (): URL => new URL(_baseUrl);
 
     /**
      * Creates a URL for the Desktop Homunculus API with optional query parameters.
@@ -36,8 +87,8 @@ export namespace host {
      * @example
      * ```typescript
      * // Simple path
-     * const url = host.createUrl("vrm/all");
-     * // Result: http://localhost:3100/vrm/all
+     * const url = host.createUrl("vrm");
+     * // Result: http://localhost:3100/vrm
      *
      * // With query parameters
      * const url = host.createUrl("entities", { name: "VRM", root: 123 });
@@ -45,7 +96,7 @@ export namespace host {
      * ```
      */
     export const createUrl = (path: string, params?: object): URL => {
-        const url = new URL(path, base);
+        const url = new URL(path, base());
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
                 url.searchParams.append(key, String(value));
@@ -59,11 +110,11 @@ export namespace host {
      *
      * @param url - The URL to send the GET request to
      * @returns The Response object if successful
-     * @throws Will throw an error if the response is not ok (status >= 400)
+     * @throws {HomunculusApiError} If the response status is >= 400
      *
      * @example
      * ```typescript
-     * const response = await host.get(host.createUrl("vrm/all"));
+     * const response = await host.get(host.createUrl("vrm"));
      * const data = await response.json();
      * ```
      */
@@ -79,18 +130,17 @@ export namespace host {
      * @param url - The URL to send the POST request to
      * @param body - Optional request body that will be JSON-serialized
      * @returns The Response object if successful
-     * @throws Will throw an error if the response is not ok (status >= 400)
+     * @throws {HomunculusApiError} If the response status is >= 400
      *
      * @example
      * ```typescript
      * const response = await host.post(
-     *   host.createUrl("gpt/chat"),
-     *   { userMessage: "Hello!", options: { vrm: 123 } }
+     *   host.createUrl("vrm"),
+     *   { asset: "my-mod::character.vrm" }
      * );
-     * const chatResponse = await response.json();
      * ```
      */
-    export const post = async (url: URL, body?: any): Promise<Response> => {
+    export const post = async <B>(url: URL, body?: B): Promise<Response> => {
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -108,19 +158,39 @@ export namespace host {
      * @param url - The URL to send the PUT request to
      * @param body - Optional request body that will be JSON-serialized
      * @returns The Response object if successful
-     * @throws Will throw an error if the response is not ok (status >= 400)
+     * @throws {HomunculusApiError} If the response status is >= 400
      *
      * @example
      * ```typescript
      * await host.put(
-     *   host.createUrl("gpt/model"),
-     *   { model: "gpt-4", vrm: 123 }
+     *   host.createUrl("vrm/123/state"),
+     *   { state: "idle" }
      * );
      * ```
      */
-    export const put = async (url: URL, body?: any): Promise<Response> => {
+    export const put = async <B>(url: URL, body?: B): Promise<Response> => {
         const response = await fetch(url, {
             method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body ?? {})
+        });
+        await throwIfError(response);
+        return response;
+    }
+
+    /**
+     * Performs a PATCH request with JSON payload and automatic error handling.
+     *
+     * @param url - The URL to send the PATCH request to
+     * @param body - Optional request body that will be JSON-serialized
+     * @returns The Response object if successful
+     * @throws {HomunculusApiError} If the response status is >= 400
+     */
+    export const patch = async <B>(url: URL, body?: B): Promise<Response> => {
+        const response = await fetch(url, {
+            method: "PATCH",
             headers: {
                 "Content-Type": "application/json"
             },
@@ -137,16 +207,88 @@ export namespace host {
         await throwIfError(response);
         return response;
     }
+
+    /**
+     * Performs a POST request and returns an async generator that yields
+     * parsed NDJSON objects from the streaming response.
+     *
+     * @param url - The URL to send the POST request to
+     * @param body - Optional request body that will be JSON-serialized
+     * @param signal - Optional AbortSignal for cancellation
+     * @returns An async generator yielding parsed JSON objects of type T
+     * @throws {HomunculusApiError} If the response status is >= 400
+     * @throws {HomunculusStreamError} If an NDJSON line cannot be parsed
+     *
+     * @example
+     * ```typescript
+     * const stream = host.postStream<MyEvent>(
+     *   host.createUrl("mods/my-mod/commands/execute"),
+     *   { command: "build" }
+     * );
+     * for await (const event of stream) {
+     *   console.log(event);
+     * }
+     * ```
+     */
+    export async function* postStream<T>(url: URL, body?: unknown, signal?: AbortSignal): AsyncGenerator<T> {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body ?? {}),
+            signal,
+        });
+        await throwIfError(response);
+
+        if (!response.body) {
+            return;
+        }
+
+        const reader = response.body
+            .pipeThrough(new TextDecoderStream())
+            .getReader();
+
+        let buffer = "";
+        try {
+            for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += value;
+                const lines = buffer.split("\n");
+                // Keep the last (possibly incomplete) chunk in the buffer
+                buffer = lines.pop()!;
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed.length === 0) continue;
+                    try {
+                        yield JSON.parse(trimmed) as T;
+                    } catch (e) {
+                        throw new HomunculusStreamError(trimmed, e);
+                    }
+                }
+            }
+            // Process any remaining data in the buffer
+            const trimmed = buffer.trim();
+            if (trimmed.length > 0) {
+                try {
+                    yield JSON.parse(trimmed) as T;
+                } catch (e) {
+                    throw new HomunculusStreamError(trimmed, e);
+                }
+            }
+        } finally {
+            reader.releaseLock();
+        }
+    }
 }
 
-/**
- * Internal helper function that throws an error if the HTTP response indicates failure.
- *
- * @param response - The Response object to check
- * @throws Will throw a detailed error if response.ok is false
- */
 const throwIfError = async (response: Response): Promise<void> => {
     if (!response.ok) {
-        throw new Error(`url: ${response.url}\nStatus ${response.statusText}\n${await response.text()}`);
+        throw new HomunculusApiError(
+            response.status,
+            response.url,
+            await response.text()
+        );
     }
 }

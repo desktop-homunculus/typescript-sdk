@@ -1,45 +1,28 @@
 import {host} from "./host";
-import {Transform} from "./math";
+import {
+    type WebviewOpenOptions,
+    type WebviewInfo,
+    type WebviewPatchRequest,
+    type WebviewSource,
+    type Vec2,
+} from "./math";
 import {Vrm} from "./vrm";
 
 /**
  * Webview management for creating and controlling embedded web interfaces.
  *
  * Desktop Homunculus uses webviews to provide rich UI experiences that can be
- * positioned anywhere in 3D space or attached to VRM characters. Webviews can
- * display HTML/CSS/JavaScript content from mod assets and provide interactive
- * interfaces for users.
- *
- * Key features:
- * - 3D positioned webviews in world space (global webviews)
- * - VRM bone-attached webviews that follow characters (local webviews)
- * - Transparent and styled webview windows
- * - Mod asset integration for custom HTML content
- * - Cross-webview communication via commands API
+ * positioned anywhere in 3D space or attached to VRM characters.
  *
  * @example
  * ```typescript
- * // Open a global webview at a fixed world position
  * const webview = await Webview.open({
- *   source: "my-mod::ui.html",
- *   transform: {
- *     translation: [0, 1.5, 0],
- *     rotation: [0, 0, 0, 1],
- *     scale: [1, 1, 1]
- *   },
- *   viewportSize: [800, 600]
+ *   source: { type: "url", url: "my-mod::ui.html" },
+ *   size: { x: 0.7, y: 0.7 },
+ *   viewportSize: { x: 800, y: 600 },
+ *   offset: { x: 0, y: 0.5 },
  * });
  *
- * // Open a local webview attached to a VRM character's head
- * const chatBubble = await Webview.openLocal({
- *   source: "chat-mod::bubble.html",
- *   vrm: vrmEntity,
- *   bone: "head",
- *   offset: [0, 0.3, 0],
- *   viewportSize: [400, 300]
- * });
- *
- * // Check if webview is still open
  * if (!(await webview.isClosed())) {
  *   await webview.close();
  * }
@@ -47,93 +30,7 @@ import {Vrm} from "./vrm";
  */
 
 /**
- * Sound options for webview open/close events.
- */
-export interface WebviewSoundOptions {
-    /**
-     * Sound to play when the webview is opened.
-     * This can be a mod asset sound file path.
-     */
-    open?: string;
-    /**
-     * Sound to play when the webview is closed.
-     * This can be a mod asset sound file path.
-     */
-    close?: string;
-}
-
-/**
- * Configuration options for opening a global webview in world space.
- */
-export interface WebviewOpenOptions {
-    /**
-     * The source local path (relative to `assets/mods`) or URL to display.
-     * Format: "mod-name::path/to/file.html" or a full URL.
-     */
-    source: string;
-    /**
-     * 3D transform (position, rotation, scale) in world space.
-     */
-    transform: Transform;
-    /**
-     * Parent entity ID to attach the webview to (optional).
-     */
-    parent?: number;
-    /**
-     * VRM entity ID to associate with this webview (optional).
-     * This creates a metadata link, not a parent-child relationship.
-     */
-    linkedVrm?: number;
-    /**
-     * Viewport resolution in pixels [width, height].
-     * @defaultValue [800, 800]
-     */
-    viewportSize?: [number, number];
-    /**
-     * Sound effects for open/close events.
-     */
-    sounds?: WebviewSoundOptions;
-}
-
-/**
- * Configuration options for opening a local webview attached to a VRM bone.
- */
-export interface LocalWebviewOptions {
-    /**
-     * The source local path (relative to `assets/mods`) or URL to display.
-     * Format: "mod-name::path/to/file.html" or a full URL.
-     */
-    source: string;
-    /**
-     * VRM entity ID to attach the webview to.
-     */
-    vrm: number;
-    /**
-     * Bone name to attach the webview to (e.g., "head", "neck", "spine").
-     */
-    bone: string;
-    /**
-     * Translation offset from the bone position [x, y, z].
-     * @defaultValue [0, 0, 0]
-     */
-    offset?: [number, number, number];
-    /**
-     * Viewport resolution in pixels [width, height].
-     * @defaultValue [800, 800]
-     */
-    viewportSize?: [number, number];
-    /**
-     * Sound effects for open/close events.
-     */
-    sounds?: WebviewSoundOptions;
-}
-
-/**
  * Represents a webview instance that can display HTML content in 3D space.
- *
- * Webviews are embedded browser windows that can render mod assets and provide
- * interactive user interfaces. They can be positioned freely in 3D space or
- * attached to VRM characters.
  */
 export class Webview {
     constructor(readonly entity: number) {
@@ -142,28 +39,15 @@ export class Webview {
 
     /**
      * Closes the webview.
-     *
-     * @example
-     * ```ts
-     * await webview.close();
-     * ```
      */
     async close(): Promise<void> {
-        await host.post(host.createUrl(`webviews/${this.entity}/close`));
+        await host.deleteMethod(host.createUrl(`webviews/${this.entity}`));
     }
 
     /**
      * Checks whether this webview has been closed.
      *
      * @returns A promise that resolves to true if the webview is closed
-     * @example
-     * ```typescript
-     * if (await webview.isClosed()) {
-     *   console.log("Webview was closed");
-     * } else {
-     *   console.log("Webview is still open");
-     * }
-     * ```
      */
     async isClosed(): Promise<boolean> {
         const response = await host.get(host.createUrl(`webviews/${this.entity}/is-closed`));
@@ -171,21 +55,110 @@ export class Webview {
     }
 
     /**
-     * Gets the VRM linked to this webview.
+     * Gets information about this webview.
      *
-     * @returns The linked VRM instance, or undefined if no VRM is linked
+     * @returns A promise that resolves to the webview info
+     */
+    async info(): Promise<WebviewInfo> {
+        const response = await host.get(host.createUrl(`webviews/${this.entity}`));
+        return await response.json() as WebviewInfo;
+    }
+
+    /**
+     * Patches webview properties (offset, size, viewportSize).
+     *
+     * @param options - The properties to update
+     */
+    async patch(options: WebviewPatchRequest): Promise<void> {
+        await host.patch(host.createUrl(`webviews/${this.entity}`), options);
+    }
+
+    /**
+     * Sets the offset of the webview.
+     *
+     * @param offset - The new offset
+     */
+    async setOffset(offset: Vec2): Promise<void> {
+        await this.patch({ offset });
+    }
+
+    /**
+     * Sets the size of the webview.
+     *
+     * @param size - The new size
+     */
+    async setSize(size: Vec2): Promise<void> {
+        await this.patch({ size });
+    }
+
+    /**
+     * Sets the viewport size of the webview.
+     *
+     * @param size - The new viewport size
+     */
+    async setViewportSize(size: Vec2): Promise<void> {
+        await this.patch({ viewportSize: size });
+    }
+
+    /**
+     * Navigates the webview to a new source.
+     *
+     * @param source - The new source (URL/path, inline HTML, or local asset ID)
      *
      * @example
      * ```typescript
-     * const webview = Webview.current();
-     * const vrm = await webview?.linkedVrm();
-     * if (vrm) {
-     *   console.log("Linked to VRM:", vrm.entity);
-     * }
+     * const wv = new Webview(entity);
+     * // Navigate to a mod asset
+     * await wv.navigate({ type: "url", url: "my-mod::page.html" });
+     * // Navigate to inline HTML
+     * await wv.navigate({ type: "html", content: "<h1>Hello</h1>" });
+     * // Navigate to a local asset by ID
+     * await wv.navigate({ type: "local", id: "my-mod::panel.html" });
      * ```
      */
+    async navigate(source: WebviewSource): Promise<void> {
+        await host.post(host.createUrl(`webviews/${this.entity}/navigate`), {source});
+    }
+
+    /**
+     * Reloads the webview content.
+     */
+    async reload(): Promise<void> {
+        await host.post(host.createUrl(`webviews/${this.entity}/reload`));
+    }
+
+    /**
+     * Navigates the webview back in history.
+     *
+     * @example
+     * ```typescript
+     * const wv = (await Webview.all())[0];
+     * await new Webview(wv.entity).navigateBack();
+     * ```
+     */
+    async navigateBack(): Promise<void> {
+        await host.post(host.createUrl(`webviews/${this.entity}/navigate/back`));
+    }
+
+    /**
+     * Navigates the webview forward in history.
+     *
+     * @example
+     * ```typescript
+     * const wv = (await Webview.all())[0];
+     * await new Webview(wv.entity).navigateForward();
+     * ```
+     */
+    async navigateForward(): Promise<void> {
+        await host.post(host.createUrl(`webviews/${this.entity}/navigate/forward`));
+    }
+
+    /**
+     * Gets the VRM linked to this webview.
+     *
+     * @returns The linked VRM instance, or undefined if no VRM is linked
+     */
     async linkedVrm(): Promise<Vrm | undefined> {
-        console.log("linked path", host.createUrl(`webviews/${this.entity}/linked-vrm`))
         const response = await host.get(
             host.createUrl(`webviews/${this.entity}/linked-vrm`)
         );
@@ -197,29 +170,16 @@ export class Webview {
      * Links this webview to a VRM entity.
      *
      * @param vrm - The VRM to link to this webview
-     *
-     * @example
-     * ```typescript
-     * const webview = Webview.current();
-     * const vrm = await Vrm.findByName("MyCharacter");
-     * await webview?.setLinkedVrm(vrm);
-     * ```
      */
     async setLinkedVrm(vrm: Vrm): Promise<void> {
         await host.put(
             host.createUrl(`webviews/${this.entity}/linked-vrm`),
-            { vrm: vrm.entity }
+            {vrm: vrm.entity}
         );
     }
 
     /**
      * Removes the VRM link from this webview.
-     *
-     * @example
-     * ```typescript
-     * const webview = Webview.current();
-     * await webview?.unlinkVrm();
-     * ```
      */
     async unlinkVrm(): Promise<void> {
         await host.deleteMethod(
@@ -228,29 +188,40 @@ export class Webview {
     }
 
     /**
-     * Creates and opens a global webview positioned in absolute world coordinates.
+     * Gets all open webviews.
      *
-     * Global webviews exist independently in 3D space and don't follow any entity.
-     * Use this for fixed UI panels, world-space menus, or standalone interfaces.
+     * @returns A promise that resolves to an array of webview info
+     */
+    static async all(): Promise<WebviewInfo[]> {
+        const response = await host.get(host.createUrl("webviews"));
+        return await response.json() as WebviewInfo[];
+    }
+
+    /**
+     * Creates and opens a webview positioned in world space.
      *
-     * @param options - Configuration for the global webview
+     * @param options - Configuration for the webview
      * @returns A promise that resolves to a new Webview instance
      *
      * @example
      * ```typescript
-     * // Create a floating UI panel in world space
+     * // Open with a mod asset URL
      * const panel = await Webview.open({
-     *   source: "my-mod::settings.html",
-     *   transform: {
-     *     translation: [0, 2, -1],      // 2 units up, 1 unit back
-     *     rotation: [0, 0, 0, 1],       // No rotation
-     *     scale: [1, 1, 1]              // Normal size
-     *   },
-     *   viewportSize: [800, 600],
-     *   sounds: {
-     *     open: "my-mod::open.wav",
-     *     close: "my-mod::close.wav"
-     *   }
+     *   source: { type: "url", url: "my-mod::settings.html" },
+     *   size: { x: 0.7, y: 0.5 },
+     *   viewportSize: { x: 800, y: 600 },
+     *   offset: { x: 0, y: 1.0 },
+     * });
+     *
+     * // Open with inline HTML
+     * const inline = await Webview.open({
+     *   source: { type: "html", content: "<h1>Hello World</h1>" },
+     * });
+     *
+     * // Open with a local asset
+     * const local = await Webview.open({
+     *   source: { type: "local", id: "my-mod::panel.html" },
+     *   offset: { x: 0.5, y: 0 },
      * });
      * ```
      */
@@ -262,29 +233,10 @@ export class Webview {
     /**
      * Gets the current webview instance if called from within a webview context.
      *
-     * This static method allows code running inside a webview to get a reference
-     * to its own Webview instance for self-management operations.
-     *
      * @returns The current Webview instance, or undefined if not in a webview context
-     *
-     * @example
-     * ```typescript
-     * // From within a webview's JavaScript code
-     * const currentWebview = Webview.current();
-     * if (currentWebview) {
-     *   // This code is running inside a webview
-     *   console.log("Webview entity ID:", currentWebview.entity);
-     *
-     *   // The webview can close itself
-     *   await currentWebview.close();
-     * } else {
-     *   // This code is running outside of a webview context
-     *   console.log("Not running in a webview");
-     * }
-     * ```
      */
     static current(): Webview | undefined {
-        //@ts-ignore
+        // @ts-expect-error -- CEF injects WEBVIEW_ENTITY on the window object
         const entity: number | undefined = window.WEBVIEW_ENTITY;
         return entity !== undefined ? new Webview(entity) : undefined;
     }

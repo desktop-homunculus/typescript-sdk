@@ -1,45 +1,54 @@
 {
-  "name": "@homunculus/api",
+  "name": "@homunculus/sdk",
   "version": "1.0.0",
-  "description": "The api for desktop_homunculus",
+  "description": "TypeScript SDK for building mods and extensions for Desktop Homunculus",
   "author": "notelm",
   "license": "ISC",
   "type": "module",
-  "main": "dist/index",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "keywords": [],
   "scripts": {
     "dev": "rollup -c --configPlugin typescript --watch",
-    "build": "rollup -c --configPlugin typescript",
-    "prepare": "pnpm build",
-    "check-types": "tsc -b",
-    "tsc": "rimraf dist && tsc --watch",
+    "build": "tsc --noEmit && rollup -c --configPlugin typescript",
+    "prepare": "npm run build",
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/desktop-homunculus/typescript-sdk.git"
+    "url": "git+https://github.com/desktop-homunculus/typescript-sdk.git",
+    "directory": "sdk/typescript-sdk"
   },
   "files": [
     "dist"
   ],
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "npm@11.8.0",
   "dependencies": {
-    "eventsource": "^4.1.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "eventsource": "^4.1.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.9",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^0.4.4",
+    "@eslint/js": "^9.39.2",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.19.33",
-    "fast-glob": "^3.3.3",
+    "eslint": "^9.39.2",
     "rimraf": "^6.1.2",
     "rollup": "^4.57.1",
     "rollup-plugin-dts": "^6.3.0",
     "tslib": "^2.8.1",
-    "typescript": "^5.4.5"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.0"
   }
 }

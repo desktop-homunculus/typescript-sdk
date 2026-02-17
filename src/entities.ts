@@ -1,5 +1,5 @@
 import {host} from "./host";
-import {Transform} from "./math";
+import {type Transform} from "./math";
 
 /**
  * Entities API namespace for managing ECS (Entity Component System) entities.
@@ -172,4 +172,165 @@ export namespace entities {
         }));
         return await response.json();
     }
+
+    /**
+     * Target position for entity movement.
+     *
+     * Use `type: "world"` for direct world-space coordinates (x, y required, z optional).
+     * Use `type: "viewport"` for screen-space coordinates that are automatically converted to world space.
+     */
+    export type MoveTarget =
+        | { type: "world"; x: number; y: number; z?: number }
+        | { type: "viewport"; x: number; y: number };
+
+    /**
+     * Moves an entity to the specified position.
+     *
+     * Supports two coordinate types:
+     * - **World coordinates**: Sets the entity's position directly in 3D world space.
+     *   `z` is optional — if omitted, the entity keeps its current z position.
+     * - **Viewport coordinates**: Screen-space position that is automatically converted
+     *   to world coordinates internally.
+     *
+     * @param entity - The entity ID to move
+     * @param target - The target position (world or viewport coordinates)
+     *
+     * @example
+     * ```typescript
+     * // Move to world coordinates
+     * await entities.move(vrmEntity, { type: "world", x: 0, y: 1.5, z: -2 });
+     *
+     * // Move to world coordinates (keep current z)
+     * await entities.move(vrmEntity, { type: "world", x: 0, y: 1.5 });
+     *
+     * // Move to a screen position
+     * await entities.move(vrmEntity, { type: "viewport", x: 500, y: 300 });
+     * ```
+     */
+    export const move = async (entity: number, target: MoveTarget): Promise<void> => {
+        await host.post(host.createUrl(`entities/${entity}/move`), target);
+    }
+
+    /**
+     * Easing functions for tween animations.
+     * Controls the acceleration curve of the animation.
+     */
+    export type EasingFunction =
+        | "linear"
+        | "quadraticIn" | "quadraticOut" | "quadraticInOut"
+        | "cubicIn" | "cubicOut" | "cubicInOut"
+        | "quarticIn" | "quarticOut" | "quarticInOut"
+        | "quinticIn" | "quinticOut" | "quinticInOut"
+        | "sineIn" | "sineOut" | "sineInOut"
+        | "circularIn" | "circularOut" | "circularInOut"
+        | "exponentialIn" | "exponentialOut" | "exponentialInOut"
+        | "elasticIn" | "elasticOut" | "elasticInOut"
+        | "backIn" | "backOut" | "backInOut"
+        | "bounceIn" | "bounceOut" | "bounceInOut"
+        | "smoothStepIn" | "smoothStepOut" | "smoothStep"
+        | "smootherStepIn" | "smootherStepOut" | "smootherStep";
+
+    /**
+     * Request parameters for tweening an entity's position.
+     */
+    export interface TweenPositionRequest {
+        /** Target position as [x, y, z] */
+        target: [number, number, number];
+        /** Duration in milliseconds */
+        durationMs: number;
+        /** Easing function (default: "linear") */
+        easing?: EasingFunction;
+        /** Whether to wait for the tween to complete before returning (default: false) */
+        wait?: boolean;
+    }
+
+    /**
+     * Request parameters for tweening an entity's rotation.
+     */
+    export interface TweenRotationRequest {
+        /** Target rotation as quaternion [x, y, z, w] */
+        target: [number, number, number, number];
+        /** Duration in milliseconds */
+        durationMs: number;
+        /** Easing function (default: "linear") */
+        easing?: EasingFunction;
+        /** Whether to wait for the tween to complete before returning (default: false) */
+        wait?: boolean;
+    }
+
+    /**
+     * Request parameters for tweening an entity's scale.
+     */
+    export interface TweenScaleRequest {
+        /** Target scale as [x, y, z] */
+        target: [number, number, number];
+        /** Duration in milliseconds */
+        durationMs: number;
+        /** Easing function (default: "linear") */
+        easing?: EasingFunction;
+        /** Whether to wait for the tween to complete before returning (default: false) */
+        wait?: boolean;
+    }
+
+    /**
+     * Smoothly animate an entity's position to a target value.
+     *
+     * @param entityId - The entity ID to tween
+     * @param request - Tween parameters
+     * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
+     *
+     * @example
+     * ```typescript
+     * await entities.tweenPosition(myEntity, {
+     *   target: [100, 50, 0],
+     *   durationMs: 1000,
+     *   easing: "quadraticInOut",
+     *   wait: true,
+     * });
+     * ```
+     */
+    export const tweenPosition = async (entityId: bigint, request: TweenPositionRequest): Promise<void> => {
+        await host.post(host.createUrl(`entities/${entityId}/tween/position`), request);
+    };
+
+    /**
+     * Smoothly animate an entity's rotation to a target value.
+     *
+     * @param entityId - The entity ID to tween
+     * @param request - Tween parameters
+     * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
+     *
+     * @example
+     * ```typescript
+     * await entities.tweenRotation(myEntity, {
+     *   target: [0, 0, 0.7071, 0.7071], // 90 degrees around Z axis
+     *   durationMs: 500,
+     *   easing: "elasticOut",
+     * });
+     * ```
+     */
+    export const tweenRotation = async (entityId: bigint, request: TweenRotationRequest): Promise<void> => {
+        await host.post(host.createUrl(`entities/${entityId}/tween/rotation`), request);
+    };
+
+    /**
+     * Smoothly animate an entity's scale to a target value.
+     *
+     * @param entityId - The entity ID to tween
+     * @param request - Tween parameters
+     * @returns Promise that resolves when the request completes (or when animation finishes if wait=true)
+     *
+     * @example
+     * ```typescript
+     * await entities.tweenScale(myEntity, {
+     *   target: [2, 2, 2],
+     *   durationMs: 800,
+     *   easing: "bounceOut",
+     *   wait: false,
+     * });
+     * ```
+     */
+    export const tweenScale = async (entityId: bigint, request: TweenScaleRequest): Promise<void> => {
+        await host.post(host.createUrl(`entities/${entityId}/tween/scale`), request);
+    };
 }

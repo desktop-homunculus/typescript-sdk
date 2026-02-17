@@ -1,0 +1,1 @@
+{"root":["./src/app.ts","./src/assets.ts","./src/audio.ts","./src/coordinates.ts","./src/displays.ts","./src/effects.ts","./src/entities.ts","./src/host.ts","./src/index.ts","./src/math.ts","./src/mods.ts","./src/preferences.ts","./src/shadowpanel.ts","./src/signals.ts","./src/speech.ts","./src/vrm.ts","./src/webviews.ts"],"errors":true,"version":"5.9.3"}

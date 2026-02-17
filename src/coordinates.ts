@@ -1,0 +1,77 @@
+import {type Vec2, type Vec3, type GlobalViewport} from "./math";
+import {host} from "./host";
+
+/**
+ * Coordinates API namespace provides coordinate system transformation utilities.
+ *
+ * Provides utilities for converting between different coordinate spaces used in the
+ * Desktop Homunculus 3D environment. This is essential for positioning UI elements,
+ * placing effects, and converting between screen coordinates and 3D world positions.
+ *
+ * Coordinate systems:
+ * - **Global Viewport**: Screen-space coordinates relative to the entire desktop
+ * - **World 2D**: 2D coordinates within the 3D world space
+ * - **World 3D**: Full 3D coordinates in world space
+ *
+ * @example
+ * ```typescript
+ * // Convert mouse position to 3D world coordinates
+ * const mousePos: Vec2 = { x: 150, y: 200 };
+ * const worldPos2D = await coordinates.toWorld(mousePos);
+ *
+ * // Convert 3D object position to screen coordinates
+ * const screenPos = await coordinates.toViewport({ x: 0, y: 1.5, z: 0 });
+ * ```
+ */
+export namespace coordinates {
+    /** 2D world coordinates within the 3D scene. */
+    export type World2d = Vec2;
+
+    /** Full 3D world coordinates with x, y, and z components. */
+    export type World3d = Vec3;
+
+    /**
+     * Converts global viewport coordinates to 2D world space coordinates.
+     *
+     * This transformation maps screen-space coordinates (like mouse positions or
+     * UI element positions) into the 2D coordinate system of the 3D world.
+     *
+     * @param viewport - Screen coordinates to convert (uses center if not provided)
+     * @returns A promise that resolves to the corresponding 2D world coordinates
+     *
+     * @example
+     * ```typescript
+     * const worldPos = await coordinates.toWorld({ x: 150, y: 200 });
+     * ```
+     */
+    export const toWorld = async (
+        viewport?: Partial<GlobalViewport>
+    ): Promise<World2d> => {
+        const url = host.createUrl("coordinates/to-world", viewport);
+        const response = await host.get(url);
+        return await response.json();
+    }
+
+    /**
+     * Converts 3D world coordinates to global viewport (screen) coordinates.
+     *
+     * This transformation projects 3D positions in the world onto screen space,
+     * allowing you to position UI elements, effects, or webviews relative to
+     * 3D objects like VRM characters or scene elements.
+     *
+     * @param world - 3D world coordinates to convert (uses origin if not provided)
+     * @returns A promise that resolves to the corresponding screen coordinates
+     *
+     * @example
+     * ```typescript
+     * const screenPos = await coordinates.toViewport({ x: 0, y: 1.5, z: 0 });
+     * ```
+     */
+    export const toViewport = async (
+        world?: Partial<World3d>
+    ): Promise<GlobalViewport> => {
+        const url = host.createUrl("coordinates/to-viewport", world);
+        const response = await host.get(url);
+        return await response.json();
+    }
+}
