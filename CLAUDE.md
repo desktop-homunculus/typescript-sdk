@@ -19,11 +19,10 @@ No test framework is configured. No linter or formatter is configured.
 
 ## Build System
 
-Rollup produces three outputs from `src/index.ts`:
+Rollup produces two outputs from `src/index.ts`:
 
 1. **ESM + CJS modules** (`dist/*.js`, `dist/*.cjs`) — `preserveModules: true` keeps one output file per source file for tree-shaking
 2. **Bundled type definitions** (`dist/index.d.ts`) — assembled from individual `dist/types/*.d.ts` via `rollup-plugin-dts`
-3. **IIFE bundle for Deno** (`../../assets/scripts/denoMain.js`) — minified with Terser, exposes the SDK as `Deno.api`
 
 ## Architecture
 
