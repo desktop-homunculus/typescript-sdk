@@ -1,4 +1,4 @@
-import {host} from "./host";
+import {HomunculusApiError, host} from "./host";
 
 /**
  * Preferences API namespace for persistent data storage and user settings.
@@ -41,19 +41,30 @@ export namespace preferences {
     /**
      * Loads a value from the preference store with type safety.
      *
+     * Returns `null` if the key does not exist.
+     *
      * @template V - The expected type of the stored value
      * @param key - The unique identifier for the stored data
-     * @returns A promise that resolves to the deserialized value
-     * @throws Will throw an error if the key does not exist or cannot be parsed
+     * @returns A promise that resolves to the deserialized value, or `null` if the key does not exist
      *
      * @example
      * ```typescript
      * const username = await preferences.load<string>('username');
+     * if (username !== null) {
+     *   console.log(`Hello, ${username}`);
+     * }
      * ```
      */
-    export const load = async <V>(key: string): Promise<V> => {
-        const response = await host.get(host.createUrl(`preferences/${key}`));
-        return await response.json() as V;
+    export const load = async <V>(key: string): Promise<V | null> => {
+        try {
+            const response = await host.get(host.createUrl(`preferences/${key}`));
+            return await response.json() as V;
+        } catch (e) {
+            if (e instanceof HomunculusApiError && e.statusCode === 404) {
+                return null;
+            }
+            throw e;
+        }
     }
 
     /**
