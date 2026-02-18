@@ -10,14 +10,14 @@
  * ```typescript
  * // Working with transforms
  * const transform: TransformArgs = {
- *   translation: { x: 0, y: 100, z: 0 },
- *   rotation: { x: 0, y: 0, z: 0, w: 1 },
- *   scale: { x: 1, y: 1, z: 1 }
+ *   translation: [0, 100, 0],
+ *   rotation: [0, 0, 0, 1],
+ *   scale: [1, 1, 1]
  * };
  *
  * // Working with vectors
- * const position: Vec3 = { x: 10, y: 20, z: 30 };
- * const screenPos: Vec2 = { x: 1920, y: 1080 };
+ * const position: Vec3 = [10, 20, 30];
+ * const screenPos: Vec2 = [1920, 1080];
  * ```
  */
 
@@ -56,38 +56,26 @@ export interface Transform {
 }
 
 /**
- * Represents a 2D vector with x and y components.
+ * Represents a 2D vector as [x, y].
  * Used for screen coordinates, UI positions, and 2D math operations.
+ * Compatible with Bevy's Vec2 serialization format.
  */
-export interface Vec2 {
-    /** The x-coordinate of the vector */
-    x: number;
-    /** The y-coordinate of the vector */
-    y: number;
-}
+export type Vec2 = [number, number];
 
 /**
- * Represents a 3D vector with x, y, and z components.
+ * Represents a 3D vector as [x, y, z].
  * Used for 3D positions, directions, and mathematical calculations.
+ * Compatible with Bevy's Vec3 serialization format.
  */
-export interface Vec3 {
-    /** The x-coordinate of the vector */
-    x: number;
-    /** The y-coordinate of the vector */
-    y: number;
-    /** The z-coordinate of the vector */
-    z: number;
-}
+export type Vec3 = [number, number, number];
 
-/** Represents a quaternion rotation. */
-export interface Quat {
-    x: number;
-    y: number;
-    z: number;
-    w: number;
-}
+/**
+ * Represents a quaternion rotation as [x, y, z, w].
+ * Compatible with Bevy's Quat serialization format.
+ */
+export type Quat = [number, number, number, number];
 
-/** Transform arguments using object form (Vec3/Quat) for API requests. */
+/** Transform arguments for API requests. Partial version of Transform. */
 export interface TransformArgs {
     translation?: Vec3;
     rotation?: Quat;
@@ -110,11 +98,8 @@ export interface GlobalDisplay {
     frame: Rect;
 }
 
-/** Global viewport coordinates (screen-space position). */
-export interface GlobalViewport {
-    x: number;
-    y: number;
-}
+/** Global viewport coordinates (screen-space position) as [x, y]. */
+export type GlobalViewport = [number, number];
 
 // --- Persona types ---
 
@@ -252,6 +237,8 @@ export interface VrmaPlayRequest {
     transitionSecs?: number;
     repeat?: VrmaRepeat;
     waitForCompletion?: boolean;
+    /** If true, resets SpringBone velocities to prevent bouncing during animation transitions. */
+    resetSpringBones?: boolean;
 }
 
 /** State of a VRMA animation. */
@@ -281,7 +268,7 @@ export type LookAtState =
  * ```typescript
  * const snapshots = await Vrm.findAllDetailed();
  * for (const s of snapshots) {
- *   console.log(`${s.name}: ${s.state} at (${s.globalViewport?.x}, ${s.globalViewport?.y})`);
+ *   console.log(`${s.name}: ${s.state} at (${s.globalViewport?.[0]}, ${s.globalViewport?.[1]})`);
  * }
  * ```
  */
@@ -305,8 +292,8 @@ export interface VrmSnapshot {
  * ```ts
  * const vrm = await Vrm.findByName("MyCharacter");
  * const pos = await vrm.position();
- * console.log(`Screen: (${pos.globalViewport?.x}, ${pos.globalViewport?.y})`);
- * console.log(`World: (${pos.world.x}, ${pos.world.y}, ${pos.world.z})`);
+ * console.log(`Screen: (${pos.globalViewport?.[0]}, ${pos.globalViewport?.[1]})`);
+ * console.log(`World: (${pos.world[0]}, ${pos.world[1]}, ${pos.world[2]})`);
  * ```
  */
 export interface PositionResponse {
@@ -389,9 +376,9 @@ export interface WebviewInfo {
  * ```typescript
  * const options: WebviewOpenOptions = {
  *   source: { type: "url", url: "my-mod::ui.html" },
- *   size: { x: 0.7, y: 0.7 },
- *   viewportSize: { x: 800, y: 600 },
- *   offset: { x: 0, y: 0.5 },
+ *   size: [0.7, 0.7],
+ *   viewportSize: [800, 600],
+ *   offset: [0, 0.5],
  * };
  * ```
  */
