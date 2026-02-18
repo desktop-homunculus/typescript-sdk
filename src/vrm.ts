@@ -252,8 +252,8 @@ export class Vrm {
      * ```ts
      * const vrm = await Vrm.findByName("MyCharacter");
      * const pos = await vrm.position();
-     * console.log(`Screen: (${pos.globalViewport?.x}, ${pos.globalViewport?.y})`);
-     * console.log(`World: (${pos.world.x}, ${pos.world.y}, ${pos.world.z})`);
+     * console.log(`Screen: (${pos.globalViewport?.[0]}, ${pos.globalViewport?.[1]})`);
+     * console.log(`World: (${pos.world[0]}, ${pos.world[1]}, ${pos.world[2]})`);
      * ```
      */
     async position(): Promise<PositionResponse> {
@@ -536,7 +536,7 @@ export class Vrm {
      * ```typescript
      * const snapshots = await Vrm.findAllDetailed();
      * for (const s of snapshots) {
-     *   console.log(`${s.name}: ${s.state} at (${s.globalViewport?.x}, ${s.globalViewport?.y})`);
+     *   console.log(`${s.name}: ${s.state} at (${s.globalViewport?.[0]}, ${s.globalViewport?.[1]})`);
      * }
      * ```
      */

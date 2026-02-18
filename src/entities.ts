@@ -1,5 +1,5 @@
 import {host} from "./host";
-import {type Transform} from "./math";
+import {type Transform, type Vec2} from "./math";
 
 /**
  * Entities API namespace for managing ECS (Entity Component System) entities.
@@ -176,12 +176,12 @@ export namespace entities {
     /**
      * Target position for entity movement.
      *
-     * Use `type: "world"` for direct world-space coordinates (x, y required, z optional).
+     * Use `type: "world"` for direct world-space coordinates (position as [x, y], z optional).
      * Use `type: "viewport"` for screen-space coordinates that are automatically converted to world space.
      */
     export type MoveTarget =
-        | { type: "world"; x: number; y: number; z?: number }
-        | { type: "viewport"; x: number; y: number };
+        | { type: "world"; position: Vec2; z?: number }
+        | { type: "viewport"; position: Vec2 };
 
     /**
      * Moves an entity to the specified position.
@@ -198,13 +198,13 @@ export namespace entities {
      * @example
      * ```typescript
      * // Move to world coordinates
-     * await entities.move(vrmEntity, { type: "world", x: 0, y: 1.5, z: -2 });
+     * await entities.move(vrmEntity, { type: "world", position: [0, 1.5], z: -2 });
      *
      * // Move to world coordinates (keep current z)
-     * await entities.move(vrmEntity, { type: "world", x: 0, y: 1.5 });
+     * await entities.move(vrmEntity, { type: "world", position: [0, 1.5] });
      *
      * // Move to a screen position
-     * await entities.move(vrmEntity, { type: "viewport", x: 500, y: 300 });
+     * await entities.move(vrmEntity, { type: "viewport", position: [500, 300] });
      * ```
      */
     export const move = async (entity: number, target: MoveTarget): Promise<void> => {

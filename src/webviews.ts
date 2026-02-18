@@ -18,9 +18,9 @@ import {Vrm} from "./vrm";
  * ```typescript
  * const webview = await Webview.open({
  *   source: { type: "url", url: "my-mod::ui.html" },
- *   size: { x: 0.7, y: 0.7 },
- *   viewportSize: { x: 800, y: 600 },
- *   offset: { x: 0, y: 0.5 },
+ *   size: [0.7, 0.7],
+ *   viewportSize: [800, 600],
+ *   offset: [0, 0.5],
  * });
  *
  * if (!(await webview.isClosed())) {
@@ -208,9 +208,9 @@ export class Webview {
      * // Open with a mod asset URL
      * const panel = await Webview.open({
      *   source: { type: "url", url: "my-mod::settings.html" },
-     *   size: { x: 0.7, y: 0.5 },
-     *   viewportSize: { x: 800, y: 600 },
-     *   offset: { x: 0, y: 1.0 },
+     *   size: [0.7, 0.5],
+     *   viewportSize: [800, 600],
+     *   offset: [0, 1.0],
      * });
      *
      * // Open with inline HTML
@@ -221,7 +221,7 @@ export class Webview {
      * // Open with a local asset
      * const local = await Webview.open({
      *   source: { type: "local", id: "my-mod::panel.html" },
-     *   offset: { x: 0.5, y: 0 },
+     *   offset: [0.5, 0],
      * });
      * ```
      */

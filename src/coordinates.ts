@@ -16,8 +16,7 @@ import {host} from "./host";
  * @example
  * ```typescript
  * // Convert mouse position to 3D world coordinates
- * const mousePos: Vec2 = { x: 150, y: 200 };
- * const worldPos2D = await coordinates.toWorld(mousePos);
+ * const worldPos2D = await coordinates.toWorld({ x: 150, y: 200 });
  *
  * // Convert 3D object position to screen coordinates
  * const screenPos = await coordinates.toViewport({ x: 0, y: 1.5, z: 0 });
@@ -45,8 +44,8 @@ export namespace coordinates {
      * ```
      */
     export const toWorld = async (
-        viewport?: Partial<GlobalViewport>
-    ): Promise<World2d> => {
+        viewport?: { x?: number; y?: number }
+    ): Promise<Vec2> => {
         const url = host.createUrl("coordinates/to-world", viewport);
         const response = await host.get(url);
         return await response.json();
@@ -68,7 +67,7 @@ export namespace coordinates {
      * ```
      */
     export const toViewport = async (
-        world?: Partial<World3d>
+        world?: { x?: number; y?: number; z?: number }
     ): Promise<GlobalViewport> => {
         const url = host.createUrl("coordinates/to-viewport", world);
         const response = await host.get(url);
